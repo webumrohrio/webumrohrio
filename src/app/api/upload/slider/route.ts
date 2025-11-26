@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
+import { uploadToCloudinary } from '@/lib/cloudinary'
 
 export async function POST(request: Request) {
   try {
@@ -31,32 +30,12 @@ export async function POST(request: Request) {
       }, { status: 400 })
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Create unique filename
-    const timestamp = Date.now()
-    const originalName = file.name.replace(/\s+/g, '-')
-    const filename = `slider-${timestamp}-${originalName}`
-
-    // Ensure upload directory exists
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'sliders')
-    try {
-      await mkdir(uploadDir, { recursive: true })
-    } catch (error) {
-      // Directory might already exist
-    }
-
-    // Save file
-    const filepath = path.join(uploadDir, filename)
-    await writeFile(filepath, buffer)
-
-    // Return public URL
-    const url = `/uploads/sliders/${filename}`
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(file, 'umroh/sliders')
 
     return NextResponse.json({
       success: true,
-      url,
+      url: result.secure_url,
       message: 'File uploaded successfully'
     })
   } catch (error) {

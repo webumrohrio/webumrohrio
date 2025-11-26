@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { uploadToCloudinary } from '@/lib/cloudinary'
 
 export async function POST(request: Request) {
   try {
@@ -32,30 +30,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Create uploads directory if it doesn't exist
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'packages')
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
-    }
-
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`
-    const ext = file.name.split('.').pop()
-    const filename = `package-${uniqueSuffix}.${ext}`
-    const filepath = join(uploadDir, filename)
-
-    // Write file
-    await writeFile(filepath, buffer)
-
-    // Return URL
-    const url = `/uploads/packages/${filename}`
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(file, 'umroh/packages')
 
     return NextResponse.json({
       success: true,
-      url,
+      url: result.secure_url,
       message: 'File uploaded successfully'
     })
   } catch (error) {
