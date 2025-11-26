@@ -1,0 +1,241 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  name              String
+  phone             String?
+  avatar            String?
+  preferredLocation String?
+  lastActive        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  favorites        Favorite[]
+  articleFavorites ArticleFavorite[]
+  articleComments  ArticleComment[]
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  email     String?
+  role      String   @default("admin") // admin, superadmin
+  isActive  Boolean  @default(true)
+  lastLogin DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  articles  Article[]
+}
+
+model Travel {
+  id               String   @id @default(cuid())
+  username         String   @unique
+  email            String?  @unique
+  password         String?  // Hashed password for travel admin login
+  name             String
+  description      String?
+  logo             String?
+  coverImage       String?
+  address          String?
+  city             String?
+  phone            String?
+  website          String?
+  rating           Float    @default(0)
+  totalReviews     Int      @default(0)
+  totalJamaah      Int      @default(0)
+  yearEstablished  Int?
+  licenses         String?  // JSON string
+  facilities       String?  // JSON string
+  services         String?  // JSON string
+  gallery          String?  // JSON string
+  legalDocs        String?  // JSON string
+  isActive         Boolean  @default(true)
+  isVerified       Boolean  @default(false)
+  packageLimit     Int      @default(10) // Maximum number of packages allowed
+  packageUsed      Int      @default(0)  // Total packages ever created (permanent counter)
+  lastLogin        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  packages Package[]
+  articles Article[]
+}
+
+model Package {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String?  @unique
+  description     String?
+  image           String?
+  price           Int
+  originalPrice   Int?
+  cashback        Int      @default(0)
+  duration        String
+  departureCity   String
+  departureDate   DateTime
+  returnDate      DateTime?
+  quota           Int
+  quotaAvailable  Int
+  rating          Float    @default(0)
+  category        String   @default("reguler") // reguler, premium, keluarga, hemat
+  flightType      String   @default("langsung") // langsung, transit
+  isBestSeller    Boolean  @default(false)
+  facilities      String?  // JSON string
+  includes        String?  // JSON string
+  excludes        String?  // JSON string
+  priceOptions    String?  // JSON string
+  itinerary       String?  // JSON string
+  views           Int      @default(0)
+  bookingClicks   Int      @default(0)
+  isActive        Boolean  @default(true)
+  isPinned        Boolean  @default(false)
+  pinnedAt        DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  travelId String
+  travel   Travel @relation(fields: [travelId], references: [id])
+
+  bookings Booking[]
+  
+  @@index([departureCity])
+  @@index([category])
+  @@index([isActive])
+  @@index([isPinned])
+  @@index([createdAt])
+  @@index([travelId])
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  content     String?
+  excerpt     String?
+  image       String?
+  slug        String   @unique
+  tags        String?
+  views       Int      @default(0)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  travelId String?
+  travel   Travel? @relation(fields: [travelId], references: [id])
+  
+  adminId  String?
+  admin    Admin?  @relation(fields: [adminId], references: [id])
+  
+  comments ArticleComment[]
+  favorites ArticleFavorite[]
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  address    String?
+  totalPeople Int
+  totalPrice Int
+  status     String   @default("pending") // pending, confirmed, cancelled
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  packageId String
+  package   Package @relation(fields: [packageId], references: [id])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  packageId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, packageId])
+  @@index([userId])
+}
+
+model ArticleFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@index([userId])
+}
+
+model ArticleComment {
+  id        String   @id @default(cuid())
+  articleId String
+  userId    String
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+  @@index([userId])
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  youtubeUrl  String
+  videoId     String
+  thumbnail   String?
+  location    String?  // Kota keberangkatan: Jakarta, Surabaya, Medan, dll
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Slider {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  image       String
+  link        String?
+  targetCity  String?  // null = all cities, or specific city name
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  showOverlay Boolean  @default(true)
+  objectFit   String   @default("cover") // "cover" or "contain"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
