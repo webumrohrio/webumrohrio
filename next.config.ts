@@ -6,14 +6,6 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.watchOptions = {
-        ignored: ["**/*"],
-      };
-    }
-    return config;
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -46,6 +38,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
         port: '',
         pathname: '/**',
       },
