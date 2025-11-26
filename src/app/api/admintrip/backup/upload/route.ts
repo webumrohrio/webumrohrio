@@ -14,6 +14,18 @@ async function ensureBackupDir() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: false,
+        error: 'Backup upload is disabled on Vercel',
+        message: 'Vercel uses read-only filesystem. Use Neon Console for database management.',
+        info: 'Visit https://console.neon.tech to manage your database backups.'
+      }, { status: 400 })
+    }
+
     await ensureBackupDir()
 
     const formData = await request.formData()

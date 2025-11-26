@@ -12,6 +12,18 @@ const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads')
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: false,
+        error: 'Backup restore is disabled on Vercel',
+        message: 'Vercel uses read-only filesystem. Use Neon Console for database management.',
+        info: 'Visit https://console.neon.tech to restore from backups or use branches.'
+      }, { status: 400 })
+    }
+
     const body = await request.json()
     const { filename } = body
 

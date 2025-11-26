@@ -6,6 +6,18 @@ const BACKUP_DIR = path.join(process.cwd(), 'backups')
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: false,
+        error: 'Backup download is disabled on Vercel',
+        message: 'Use Neon Console to export your database.',
+        info: 'Visit https://console.neon.tech to manage backups.'
+      }, { status: 400 })
+    }
+
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('file')
 
