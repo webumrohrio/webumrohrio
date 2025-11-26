@@ -119,7 +119,7 @@ export default function ProfilePage() {
     { icon: Heart, label: 'Paket Favorit', href: '/favorit', badge: favoriteCounts.packages, requiresLogin: true },
     { icon: BookmarkCheck, label: 'Artikel Favorit', href: '/favorit-artikel', badge: favoriteCounts.articles, requiresLogin: true },
     { icon: Settings, label: 'Pengaturan', href: '/pengaturan', requiresLogin: false },
-    { icon: HelpCircle, label: 'Bantuan', href: '/bantuan', requiresLogin: false },
+    { icon: HelpCircle, label: 'Butuh Bantuan ?', href: '/bantuan', requiresLogin: false },
   ]
 
   return (
