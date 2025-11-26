@@ -24,6 +24,18 @@ async function ensureBackupDir() {
 // GET - List all backups
 export async function GET() {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: true,
+        data: [],
+        message: 'Backup feature is disabled on Vercel. Use Neon database backups instead.',
+        info: 'Database backups are automatically handled by Neon PostgreSQL. Visit https://console.neon.tech for backup management.'
+      })
+    }
+
     await ensureBackupDir()
 
     const files = await readdir(BACKUP_DIR)
@@ -62,6 +74,18 @@ export async function GET() {
 // POST - Create new backup
 export async function POST(request: NextRequest) {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: false,
+        error: 'Backup feature is disabled on Vercel',
+        message: 'Database backups are automatically handled by Neon PostgreSQL. Visit https://console.neon.tech for backup management.',
+        info: 'Neon provides automatic daily backups and point-in-time recovery.'
+      }, { status: 400 })
+    }
+
     const body = await request.json()
     const { type } = body // 'database' or 'full'
 
@@ -146,6 +170,17 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete a backup
 export async function DELETE(request: NextRequest) {
   try {
+    // Check if running on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1'
+    
+    if (isVercel) {
+      return NextResponse.json({
+        success: false,
+        error: 'Backup feature is disabled on Vercel',
+        message: 'Database backups are managed by Neon PostgreSQL.'
+      }, { status: 400 })
+    }
+
     const { searchParams } = new URL(request.url)
     const filename = searchParams.get('file')
 
