@@ -66,7 +66,7 @@ export function MobileLayout({ children, className, hideBottomNav = false }: Mob
                 )}
                 <div>
                   <h1 className="text-xl font-bold text-[#05968f]">Tripbaitullah</h1>
-                  <p className="text-xs text-muted-foreground">Temukan paket umroh terbaik</p>
+                  <p className="text-xs text-muted-foreground">Smart Way to Go Baitullah</p>
                 </div>
               </Link>
 
