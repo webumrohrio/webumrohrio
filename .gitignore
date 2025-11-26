@@ -54,3 +54,6 @@ server.log
 # Backups
 backups/
 *.db.backup
+
+.vercel
+.env*.local
