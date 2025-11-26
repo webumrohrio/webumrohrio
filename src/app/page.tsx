@@ -378,7 +378,7 @@ export default function Home() {
     fetchAnalytics(location)
     
     toast.success('Lokasi diperbarui!', {
-      description: `Menampilkan paket dari ${location === 'all' ? 'semua kota' : location}`
+      description: `Kota Keberangkatan dari ${location === 'all' ? 'semua kota' : location}`
     })
     
     // TODO: If user is logged in, save to database

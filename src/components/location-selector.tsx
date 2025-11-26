@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MapPin } from 'lucide-react'
+import { Plane } from 'lucide-react'
 
 interface LocationSelectorProps {
   onLocationSelect: (location: string) => void
@@ -83,9 +83,9 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
       {/* Location Badge - Always show */}
       {selectedLocation && selectedLocation !== 'all' && (
         <div className="flex items-center justify-center gap-2 py-2 px-4 bg-primary/10 border-b border-primary/20">
-          <MapPin className="w-4 h-4 text-primary" />
+          <Plane className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-primary">
-            Menampilkan paket dari <span className="font-bold">{selectedLocation}</span>
+            Kota Keberangkatan dari <span className="font-bold">{selectedLocation}</span>
           </span>
           <button
             onClick={() => setIsOpen(true)}
@@ -111,8 +111,8 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
-              Pilih Lokasi Anda
+              <Plane className="w-5 h-5 text-primary" />
+              Pilih Kota Keberangkatan
             </DialogTitle>
             <DialogDescription>
               Pilih kota untuk melihat paket umroh yang berangkat dari lokasi Anda
