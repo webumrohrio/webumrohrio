@@ -18,20 +18,26 @@ const geistMono = Geist_Mono({
 
 async function getSiteSettings() {
   try {
-    const [titleSetting, faviconSetting] = await Promise.all([
+    const [titleSetting, faviconSetting, metaDescSetting, ogImageSetting] = await Promise.all([
       prisma.settings.findUnique({ where: { key: 'siteTitle' } }),
-      prisma.settings.findUnique({ where: { key: 'siteFavicon' } })
+      prisma.settings.findUnique({ where: { key: 'siteFavicon' } }),
+      prisma.settings.findUnique({ where: { key: 'metaDescription' } }),
+      prisma.settings.findUnique({ where: { key: 'ogImage' } })
     ])
     
     return {
       title: titleSetting?.value || 'Tripbaitullah - Temukan Paket Umroh Terbaik',
-      favicon: faviconSetting?.value || '/favicon.ico'
+      favicon: faviconSetting?.value || '/favicon.ico',
+      description: metaDescSetting?.value || 'Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya',
+      ogImage: ogImageSetting?.value || '/og-image.png'
     }
   } catch (error) {
     console.error('Error fetching site settings:', error)
     return {
       title: 'Tripbaitullah - Temukan Paket Umroh Terbaik',
-      favicon: '/favicon.ico'
+      favicon: '/favicon.ico',
+      description: 'Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya',
+      ogImage: '/og-image.png'
     }
   }
 }
@@ -44,9 +50,31 @@ export async function generateMetadata(): Promise<Metadata> {
       default: settings.title,
       template: `%s | ${settings.title}`
     },
-    description: "Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya. Nikmati kemudahan memilih paket umroh sesuai kebutuhan Anda.",
+    description: settings.description,
     keywords: ["umroh", "travel umroh", "paket umroh", "haji", "ibadah", "muslim", "travel"],
     authors: [{ name: "Tripbaitullah Team" }],
+    openGraph: {
+      title: settings.title,
+      description: settings.description,
+      url: 'https://www.tripbaitullah.com',
+      siteName: 'Tripbaitullah',
+      images: [
+        {
+          url: settings.ogImage,
+          width: 1200,
+          height: 630,
+          alt: 'Tripbaitullah - Smart Way to Go Baitullah',
+        },
+      ],
+      locale: 'id_ID',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: settings.title,
+      description: settings.description,
+      images: [settings.ogImage],
+    },
     icons: {
       icon: settings.favicon,
       shortcut: settings.favicon,

@@ -70,6 +70,10 @@ export default function SettingsPage() {
   const [metaTitle, setMetaTitle] = useState('')
   const [metaDescription, setMetaDescription] = useState('')
   const [metaKeywords, setMetaKeywords] = useState('')
+  const [ogImage, setOgImage] = useState('')
+  const [ogImagePreview, setOgImagePreview] = useState('')
+  const [ogImageFile, setOgImageFile] = useState<File | null>(null)
+  const [uploadingOgImage, setUploadingOgImage] = useState(false)
   const [loadingOthers, setLoadingOthers] = useState(false)
 
   useEffect(() => {
@@ -227,6 +231,54 @@ export default function SettingsPage() {
       alert('Gagal upload favicon')
     } finally {
       setUploadingFavicon(false)
+    }
+  }
+
+  const handleOgImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setOgImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setOgImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleUploadOgImage = async () => {
+    if (!ogImageFile) {
+      alert('Pilih file OG Image terlebih dahulu')
+      return
+    }
+
+    setUploadingOgImage(true)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', ogImageFile)
+
+      const uploadResponse = await fetch('/api/upload/logo', {
+        method: 'POST',
+        body: formData
+      })
+
+      const uploadResult = await uploadResponse.json()
+
+      if (!uploadResult.success) {
+        alert('Gagal upload OG Image: ' + uploadResult.error)
+        return
+      }
+
+      setOgImage(uploadResult.url)
+      setOgImagePreview(uploadResult.url)
+      setOgImageFile(null)
+      alert('OG Image berhasil diupload!')
+    } catch (error) {
+      console.error('Error uploading OG Image:', error)
+      alert('Gagal upload OG Image')
+    } finally {
+      setUploadingOgImage(false)
     }
   }
 
@@ -629,7 +681,7 @@ export default function SettingsPage() {
 
   const fetchOthersSettings = async () => {
     try {
-      const keys = ['siteName', 'siteTagline', 'siteDescription', 'contactEmail', 'contactPhone', 'contactAddress', 'facebook', 'instagram', 'twitter', 'youtube', 'metaTitle', 'metaDescription', 'metaKeywords']
+      const keys = ['siteName', 'siteTagline', 'siteDescription', 'contactEmail', 'contactPhone', 'contactAddress', 'facebook', 'instagram', 'twitter', 'youtube', 'metaTitle', 'metaDescription', 'metaKeywords', 'ogImage']
       const responses = await Promise.all(keys.map(key => fetch(`/api/settings?key=${key}`)))
       const results = await Promise.all(responses.map(r => r.json()))
       
@@ -652,6 +704,10 @@ export default function SettingsPage() {
             case 'metaTitle': setMetaTitle(value); break
             case 'metaDescription': setMetaDescription(value); break
             case 'metaKeywords': setMetaKeywords(value); break
+            case 'ogImage': 
+              setOgImage(value)
+              setOgImagePreview(value)
+              break
           }
         }
       })
@@ -767,6 +823,11 @@ export default function SettingsPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: 'metaKeywords', value: metaKeywords })
+        }),
+        fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'ogImage', value: ogImage })
         })
       ])
       alert('✅ SEO settings berhasil disimpan!')
@@ -2301,6 +2362,51 @@ export default function SettingsPage() {
                     Pisahkan dengan koma
                   </p>
                 </div>
+
+                {/* OG Image Upload */}
+                <div className="border-t pt-4">
+                  <Label>Open Graph (OG) Image</Label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Gambar yang muncul saat link website dibagikan di sosial media (WhatsApp, Facebook, dll). Ukuran ideal: 1200x630 pixels
+                  </p>
+                  
+                  {ogImagePreview && (
+                    <div className="mb-3">
+                      <img 
+                        src={ogImagePreview} 
+                        alt="OG Image Preview" 
+                        className="w-full max-w-md h-auto rounded-lg border"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleOgImageChange}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleUploadOgImage}
+                      disabled={!ogImageFile || uploadingOgImage}
+                      variant="outline"
+                    >
+                      {uploadingOgImage ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
                 <Button 
                   onClick={saveSEOSettings}
                   disabled={loadingOthers}
