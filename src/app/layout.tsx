@@ -55,10 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : `https://www.tripbaitullah.com${settings.ogImage}`
   
   return {
-    title: {
-      default: settings.title,
-      template: `%s | ${settings.title}`
-    },
+    title: settings.title,
     description: settings.description,
     keywords: ["umroh", "travel umroh", "paket umroh", "haji", "ibadah", "muslim", "travel"],
     authors: [{ name: "Tripbaitullah Team" }],
