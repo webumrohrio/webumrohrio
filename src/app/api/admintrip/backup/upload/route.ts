@@ -13,6 +13,14 @@ async function ensureBackupDir() {
 }
 
 export async function POST(request: NextRequest) {
+  // Redirect to main backup API
+  return NextResponse.json({
+    success: false,
+    error: 'This endpoint is deprecated',
+    message: 'Please use /api/admintrip/backup for restore functionality'
+  }, { status: 410 })
+  
+  /*
   try {
     // Check if running on Vercel (read-only filesystem)
     const isVercel = process.env.VERCEL === '1'

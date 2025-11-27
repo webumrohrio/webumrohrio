@@ -1,28 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-import archiver from 'archiver'
-import { promisify } from 'util'
 
-const mkdir = promisify(fs.mkdir)
-const readdir = promisify(fs.readdir)
-const stat = promisify(fs.stat)
-const unlink = promisify(fs.unlink)
-const copyFile = promisify(fs.copyFile)
+import { exportDatabase, getDatabaseStats } from '@/lib/database-backup'
 
-const BACKUP_DIR = path.join(process.cwd(), 'backups')
-const DB_PATH = path.join(process.cwd(), 'prisma', 'db', 'custom.db')
-const UPLOADS_DIR = path.join(process.cwd(), 'public', 'uploads')
-
-// Ensure backup directory exists
-async function ensureBackupDir() {
-  if (!fs.existsSync(BACKUP_DIR)) {
-    await mkdir(BACKUP_DIR, { recursive: true })
+// GET - Export database or get stats
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
+    
+    // Export database
+    if (action === 'export') {
+      const sql = await exportDatabase()
+      const filename = `backup-${new Date().toISOString().split('T')[0]}.sql`
+      
+      return new NextResponse(sql, {
+        headers: {
+          'Content-Type': 'application/sql',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Length': Buffer.byteLength(sql).toString()
+        }
+      })
+    }
+    
+    // Get database stats
+    const stats = await getDatabaseStats()
+    
+    return NextResponse.json({
+      success: true,
+      data: stats,
+      message: 'Database backup available for download'
+    })
+  } catch (error) {
+    console.error('Backup error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to process backup request' },
+      { status: 500 }
+    )
   }
 }
 
-// GET - List all backups
-export async function GET() {
+// Old GET function (commented out)
+/*
+export async function GET_OLD() {
   try {
     // Check if running on Vercel (read-only filesystem)
     const isVercel = process.env.VERCEL === '1'
@@ -71,8 +90,60 @@ export async function GET() {
   }
 }
 
-// POST - Create new backup
+import { importDatabase } from '@/lib/database-backup'
+
+// POST - Restore database from SQL file
 export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File
+    
+    if (!file) {
+      return NextResponse.json(
+        { success: false, error: 'No file uploaded' },
+        { status: 400 }
+      )
+    }
+    
+    // Validate file type
+    if (!file.name.endsWith('.sql')) {
+      return NextResponse.json(
+        { success: false, error: 'Only .sql files are supported' },
+        { status: 400 }
+      )
+    }
+    
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { success: false, error: 'File too large. Maximum 10MB' },
+        { status: 400 }
+      )
+    }
+    
+    // Read file content
+    const sql = await file.text()
+    
+    // Import database
+    await importDatabase(sql)
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Database restored successfully'
+    })
+  } catch (error) {
+    console.error('Restore error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to restore database: ' + (error as Error).message },
+      { status: 500 }
+    )
+  }
+}
+
+// Old POST function (commented out)
+/*
+export async function POST_OLD(request: NextRequest) {
   try {
     // Check if running on Vercel (read-only filesystem)
     const isVercel = process.env.VERCEL === '1'
@@ -167,58 +238,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Delete a backup
-export async function DELETE(request: NextRequest) {
-  try {
-    // Check if running on Vercel (read-only filesystem)
-    const isVercel = process.env.VERCEL === '1'
-    
-    if (isVercel) {
-      return NextResponse.json({
-        success: false,
-        error: 'Backup feature is disabled on Vercel',
-        message: 'Database backups are managed by Neon PostgreSQL.'
-      }, { status: 400 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const filename = searchParams.get('file')
-
-    if (!filename) {
-      return NextResponse.json(
-        { success: false, error: 'Filename is required' },
-        { status: 400 }
-      )
-    }
-
-    // Security: prevent path traversal
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid filename' },
-        { status: 400 }
-      )
-    }
-
-    const filePath = path.join(BACKUP_DIR, filename)
-
-    if (!fs.existsSync(filePath)) {
-      return NextResponse.json(
-        { success: false, error: 'Backup file not found' },
-        { status: 404 }
-      )
-    }
-
-    await unlink(filePath)
-
-    return NextResponse.json({
-      success: true,
-      message: 'Backup deleted successfully'
-    })
-  } catch (error) {
-    console.error('Error deleting backup:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to delete backup' },
-      { status: 500 }
-    )
-  }
-}
+// DELETE function removed - not needed for serverless backup
