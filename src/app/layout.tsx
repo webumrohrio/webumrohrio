@@ -45,6 +45,11 @@ async function getSiteSettings() {
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
   
+  // Ensure OG image is absolute URL
+  const ogImageUrl = settings.ogImage.startsWith('http') 
+    ? settings.ogImage 
+    : `https://www.tripbaitullah.com${settings.ogImage}`
+  
   return {
     title: {
       default: settings.title,
@@ -60,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: 'Tripbaitullah',
       images: [
         {
-          url: settings.ogImage,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: 'Tripbaitullah - Smart Way to Go Baitullah',
@@ -73,7 +78,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: 'summary_large_image',
       title: settings.title,
       description: settings.description,
-      images: [settings.ogImage],
+      images: [ogImageUrl],
     },
     icons: {
       icon: settings.favicon,
