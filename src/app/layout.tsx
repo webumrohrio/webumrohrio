@@ -18,15 +18,19 @@ const geistMono = Geist_Mono({
 
 async function getSiteSettings() {
   try {
-    const [titleSetting, faviconSetting, metaDescSetting, ogImageSetting] = await Promise.all([
+    const [metaTitleSetting, titleSetting, faviconSetting, metaDescSetting, ogImageSetting] = await Promise.all([
+      prisma.settings.findUnique({ where: { key: 'metaTitle' } }),
       prisma.settings.findUnique({ where: { key: 'siteTitle' } }),
       prisma.settings.findUnique({ where: { key: 'siteFavicon' } }),
       prisma.settings.findUnique({ where: { key: 'metaDescription' } }),
       prisma.settings.findUnique({ where: { key: 'ogImage' } })
     ])
     
+    // Use metaTitle if available, otherwise fallback to siteTitle
+    const title = metaTitleSetting?.value || titleSetting?.value || 'Tripbaitullah - Temukan Paket Umroh Terbaik'
+    
     return {
-      title: titleSetting?.value || 'Tripbaitullah - Temukan Paket Umroh Terbaik',
+      title,
       favicon: faviconSetting?.value || '/favicon.ico',
       description: metaDescSetting?.value || 'Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya',
       ogImage: ogImageSetting?.value || '/og-image.png'
