@@ -258,53 +258,8 @@ Terima kasih.`
   useEffect(() => {
     if (packageDetail) {
       checkFavoriteStatus()
-      updateMetaTags()
     }
   }, [packageDetail])
-
-  const updateMetaTags = () => {
-    if (!packageDetail) return
-
-    const title = `${packageDetail.name} - ${packageDetail.travel.name} | Tripbaitullah`
-    const description = packageDetail.description || `Paket ${packageDetail.name} dari ${packageDetail.travel.name}. Durasi ${packageDetail.duration}, berangkat dari ${packageDetail.departureCity}. Harga mulai ${formatCurrency(packageDetail.price)}`
-    const image = packageDetail.image
-    const url = typeof window !== 'undefined' ? window.location.href : ''
-
-    // Update document title
-    document.title = title
-
-    // Update or create meta tags
-    const updateMetaTag = (property: string, content: string, isProperty = true) => {
-      const attribute = isProperty ? 'property' : 'name'
-      let meta = document.querySelector(`meta[${attribute}="${property}"]`) as HTMLMetaElement
-      
-      if (!meta) {
-        meta = document.createElement('meta')
-        meta.setAttribute(attribute, property)
-        document.head.appendChild(meta)
-      }
-      meta.content = content
-    }
-
-    // Primary Meta Tags
-    updateMetaTag('description', description, false)
-    
-    // Open Graph / Facebook
-    updateMetaTag('og:type', 'product')
-    updateMetaTag('og:url', url)
-    updateMetaTag('og:title', `${packageDetail.name} - ${packageDetail.travel.name}`)
-    updateMetaTag('og:description', description)
-    updateMetaTag('og:image', image)
-    updateMetaTag('og:image:width', '1200')
-    updateMetaTag('og:image:height', '630')
-    
-    // Twitter
-    updateMetaTag('twitter:card', 'summary_large_image')
-    updateMetaTag('twitter:url', url)
-    updateMetaTag('twitter:title', `${packageDetail.name} - ${packageDetail.travel.name}`)
-    updateMetaTag('twitter:description', description)
-    updateMetaTag('twitter:image', image)
-  }
 
   useEffect(() => {
     const updateItemsPerPage = () => {
