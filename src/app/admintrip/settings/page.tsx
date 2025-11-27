@@ -237,10 +237,13 @@ export default function SettingsPage() {
   const handleOgImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      console.log('File selected:', file.name)
       setOgImageFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
-        setOgImagePreview(reader.result as string)
+        const result = reader.result as string
+        console.log('Preview set:', result.substring(0, 50) + '...')
+        setOgImagePreview(result)
       }
       reader.readAsDataURL(file)
     }
@@ -267,13 +270,31 @@ export default function SettingsPage() {
 
       if (!uploadResult.success) {
         alert('Gagal upload OG Image: ' + uploadResult.error)
+        setUploadingOgImage(false)
         return
       }
 
-      setOgImage(uploadResult.url)
-      setOgImagePreview(uploadResult.url)
+      // Set the uploaded URL
+      const uploadedUrl = uploadResult.url
+      console.log('Upload successful, URL:', uploadedUrl)
+      
+      setOgImage(uploadedUrl)
+      setOgImagePreview(uploadedUrl)
       setOgImageFile(null)
-      alert('OG Image berhasil diupload!')
+      
+      console.log('State updated, ogImagePreview:', uploadedUrl)
+      
+      // Auto-save to database
+      const saveResponse = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'ogImage', value: uploadedUrl })
+      })
+      
+      const saveResult = await saveResponse.json()
+      console.log('Save to database result:', saveResult)
+      
+      alert('OG Image berhasil diupload dan disimpan!')
     } catch (error) {
       console.error('Error uploading OG Image:', error)
       alert('Gagal upload OG Image')
