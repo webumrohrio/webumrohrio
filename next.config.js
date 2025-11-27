@@ -7,6 +7,22 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Exclude server-only packages from client bundle
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        pg: false,
+        'pg-format': false,
+      };
+    }
+    return config;
+  },
   images: {
     remotePatterns: [
       {

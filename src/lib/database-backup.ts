@@ -1,4 +1,7 @@
+// This file should only be used in server-side code (API routes)
+// @ts-ignore - pg is a server-only package
 import { Client } from 'pg';
+// @ts-ignore - pg-format is a server-only package  
 import format from 'pg-format';
 
 // Parse DATABASE_URL
