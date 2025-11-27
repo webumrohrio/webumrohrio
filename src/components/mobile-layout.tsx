@@ -25,12 +25,14 @@ const menuItems = [
 export function MobileLayout({ children, className, hideBottomNav = false }: MobileLayoutProps) {
   const pathname = usePathname()
   const [logoUrl, setLogoUrl] = useState('')
+  const [siteTagline, setSiteTagline] = useState('Smart Way to Go Baitullah')
   
   // Initialize heartbeat system for tracking user online status
   useUserHeartbeat()
 
   useEffect(() => {
     fetchLogo()
+    fetchTagline()
   }, [])
 
   const fetchLogo = async () => {
@@ -43,6 +45,19 @@ export function MobileLayout({ children, className, hideBottomNav = false }: Mob
       }
     } catch (error) {
       console.error('Error fetching logo:', error)
+    }
+  }
+
+  const fetchTagline = async () => {
+    try {
+      const response = await fetch('/api/settings?key=siteTagline')
+      const result = await response.json()
+      
+      if (result.success && result.data && result.data.value) {
+        setSiteTagline(result.data.value)
+      }
+    } catch (error) {
+      console.error('Error fetching tagline:', error)
     }
   }
   
@@ -66,7 +81,7 @@ export function MobileLayout({ children, className, hideBottomNav = false }: Mob
                 )}
                 <div>
                   <h1 className="text-xl font-bold text-[#05968f]">Tripbaitullah</h1>
-                  <p className="text-xs text-muted-foreground">Smart Way to Go Baitullah</p>
+                  <p className="text-xs text-muted-foreground">{siteTagline}</p>
                 </div>
               </Link>
 

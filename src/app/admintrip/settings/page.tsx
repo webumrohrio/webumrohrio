@@ -58,7 +58,7 @@ export default function SettingsPage() {
   
   // Others tab settings
   const [siteName, setSiteName] = useState('Tripbaitullah')
-  const [siteTagline, setSiteTagline] = useState('Temukan paket umroh terbaik')
+  const [siteTagline, setSiteTagline] = useState('Smart Way to Go Baitullah')
   const [siteDescription, setSiteDescription] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [contactPhone, setContactPhone] = useState('')
@@ -2097,7 +2097,7 @@ export default function SettingsPage() {
                     <Label htmlFor="siteTagline">Tagline</Label>
                     <Input
                       id="siteTagline"
-                      placeholder="Temukan paket umroh terbaik"
+                      placeholder="Smart Way to Go Baitullah"
                       value={siteTagline}
                       onChange={(e) => setSiteTagline(e.target.value)}
                     />

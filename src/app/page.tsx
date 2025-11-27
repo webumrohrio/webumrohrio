@@ -83,6 +83,7 @@ export default function Home() {
   const [isVideoOpen, setIsVideoOpen] = useState(false)
   const [showFullscreenHint, setShowFullscreenHint] = useState(false)
   const [logoUrl, setLogoUrl] = useState('')
+  const [siteTagline, setSiteTagline] = useState('Smart Way to Go Baitullah')
   const [preferredLocation, setPreferredLocation] = useState<string>('')
   
   // Homepage settings
@@ -127,6 +128,7 @@ export default function Home() {
     
     fetchHomepageSettings()
     fetchLogo()
+    fetchTagline()
     fetchAnalytics(savedLocation || '')
   }, [])
   
@@ -341,6 +343,19 @@ export default function Home() {
     }
   }
 
+  const fetchTagline = async () => {
+    try {
+      const response = await fetch('/api/settings?key=siteTagline')
+      const result = await response.json()
+      
+      if (result.success && result.data && result.data.value) {
+        setSiteTagline(result.data.value)
+      }
+    } catch (error) {
+      console.error('Error fetching tagline:', error)
+    }
+  }
+
   const fetchHomepageSettings = async () => {
     try {
       const [countRes, analyticsRes, promoRes] = await Promise.all([
@@ -421,7 +436,7 @@ export default function Home() {
                   <h1 className="text-[18px] font-bold text-[#05968f]">
                     Tripbaitullah
                   </h1>
-                  <p className="text-xs text-muted-foreground">Smart Way to Go Baitullah</p>
+                  <p className="text-xs text-muted-foreground">{siteTagline}</p>
                 </div>
               </div>
               <Button 
