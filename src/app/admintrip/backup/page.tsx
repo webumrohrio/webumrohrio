@@ -42,7 +42,9 @@ export default function BackupPage() {
       const result = await response.json()
       
       if (result.success) {
-        setBackups(result.data)
+        // API now returns stats object, not array of backups
+        // For now, set empty array since we don't store backups on serverless
+        setBackups([])
       }
     } catch (error) {
       console.error('Error fetching backups:', error)
@@ -52,23 +54,31 @@ export default function BackupPage() {
   }
 
   const handleCreateBackup = async (type: 'database' | 'full') => {
-    if (!confirm(`Buat backup ${type === 'full' ? 'lengkap (database + files)' : 'database saja'}?`)) return
+    if (type === 'full') {
+      alert('Backup lengkap tidak tersedia di Vercel.\n\nGunakan "Backup Database" untuk export database saja.\n\nGambar sudah aman di Cloudinary.')
+      return
+    }
+
+    if (!confirm('Download backup database sekarang?')) return
 
     setCreating(true)
     try {
-      const response = await fetch('/api/admintrip/backup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type })
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        alert('Backup berhasil dibuat!')
-        fetchBackups()
+      // Download database backup
+      const response = await fetch('/api/admintrip/backup?action=export')
+      
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `backup-${new Date().toISOString().split('T')[0]}.sql`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+        alert('Backup berhasil di-download!')
       } else {
-        alert('Gagal membuat backup: ' + result.error)
+        alert('Gagal membuat backup')
       }
     } catch (error) {
       console.error('Error creating backup:', error)
@@ -147,21 +157,21 @@ export default function BackupPage() {
 
     // Validate file type
     const fileExt = file.name.split('.').pop()?.toLowerCase()
-    if (fileExt !== 'db' && fileExt !== 'zip') {
-      alert('File tidak valid! Hanya file .db atau .zip yang diperbolehkan.')
+    if (fileExt !== 'sql') {
+      alert('File tidak valid! Hanya file .sql yang diperbolehkan.')
       event.target.value = ''
       return
     }
 
-    // Validate file size (100MB)
-    const maxSize = 100 * 1024 * 1024
+    // Validate file size (10MB)
+    const maxSize = 10 * 1024 * 1024
     if (file.size > maxSize) {
-      alert('File terlalu besar! Maksimal 100MB.')
+      alert('File terlalu besar! Maksimal 10MB.')
       event.target.value = ''
       return
     }
 
-    if (!confirm(`Upload backup "${file.name}"?\n\nFile akan disimpan ke daftar backup dan bisa di-restore nanti.`)) {
+    if (!confirm(`PERINGATAN: Restore akan mengganti semua data database saat ini!\n\nFile: ${file.name}\n\nLanjutkan restore?`)) {
       event.target.value = ''
       return
     }
@@ -173,7 +183,7 @@ export default function BackupPage() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('/api/admintrip/backup/upload', {
+      const response = await fetch('/api/admintrip/backup', {
         method: 'POST',
         body: formData
       })
@@ -181,14 +191,14 @@ export default function BackupPage() {
       const result = await response.json()
 
       if (result.success) {
-        alert(`Backup berhasil di-upload!\n\nFile: ${result.data.filename}\nUkuran: ${formatFileSize(result.data.size)}`)
-        fetchBackups()
+        alert('Database berhasil di-restore!\n\nHalaman akan di-refresh.')
+        window.location.reload()
       } else {
-        alert('Gagal upload backup: ' + result.error)
+        alert('Gagal restore: ' + result.error)
       }
     } catch (error) {
-      console.error('Error uploading backup:', error)
-      alert('Gagal upload backup')
+      console.error('Error restoring backup:', error)
+      alert('Gagal restore backup')
     } finally {
       setUploading(false)
       setUploadProgress(0)
@@ -275,7 +285,7 @@ export default function BackupPage() {
             <input
               type="file"
               id="backup-upload"
-              accept=".db,.zip"
+              accept=".sql"
               onChange={handleUpload}
               disabled={uploading}
               className="hidden"
@@ -289,7 +299,7 @@ export default function BackupPage() {
               {uploading ? (
                 <>
                   <Loader2 className="w-6 h-6 animate-spin mb-2" />
-                  <span className="font-semibold">Uploading...</span>
+                  <span className="font-semibold">Restoring...</span>
                   {uploadProgress > 0 && (
                     <span className="text-xs opacity-80">{uploadProgress}%</span>
                   )}
@@ -297,8 +307,8 @@ export default function BackupPage() {
               ) : (
                 <>
                   <Upload className="w-6 h-6 mb-2" />
-                  <span className="font-semibold">Upload Backup</span>
-                  <span className="text-xs opacity-80">File .db atau .zip (max 100MB)</span>
+                  <span className="font-semibold">Restore Database</span>
+                  <span className="text-xs opacity-80">Upload file .sql (max 10MB)</span>
                 </>
               )}
             </Button>
