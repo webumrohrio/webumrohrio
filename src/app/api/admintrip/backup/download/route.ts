@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(_request: NextRequest) {
+  return NextResponse.json({
+    success: false,
+    error: 'This endpoint is deprecated',
+    message: 'Please use /api/admintrip/backup?action=export for database export'
+  }, { status: 410 })
+}
+
+/*
+// Old implementation - commented out
 import fs from 'fs'
 import path from 'path'
 
 const BACKUP_DIR = path.join(process.cwd(), 'backups')
 
-export async function GET(request: NextRequest) {
+export async function GET_OLD(request: NextRequest) {
   try {
     // Check if running on Vercel (read-only filesystem)
     const isVercel = process.env.VERCEL === '1'
@@ -63,3 +74,4 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+*/
