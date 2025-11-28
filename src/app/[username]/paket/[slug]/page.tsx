@@ -318,7 +318,7 @@ ${window.location.href}
     proceedToWhatsApp(bookingForm.name, cleanPhone, bookingForm.pax)
   }
 
-  const proceedToWhatsApp = async (userName: string, userPhone: string, pax: number) => {
+  const proceedToWhatsApp = (userName: string, userPhone: string, pax: number) => {
     if (!packageDetail) return
 
     const departureDate = new Date(packageDetail.departureDate).toLocaleDateString('id-ID', {
@@ -366,55 +366,53 @@ ${window.location.href}
 
 Terima kasih.`
     
-    // Track booking click
-    fetch(`/api/packages/${packageDetail.id}/booking-click`, {
-      method: 'POST'
-    }).catch(err => console.error('Failed to track booking click:', err))
-
-    // Log booking to database
-    try {
-      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
-      const user = localStorage.getItem('currentUser')
-      let userId = null
-      let isGuest = true
-      
-      if (isLoggedIn && user) {
-        try {
-          const userData = JSON.parse(user)
-          userId = userData.id || null
-          isGuest = false
-        } catch (e) {
-          console.error('Failed to parse user data:', e)
-        }
-      }
-
-      await fetch('/api/admintrip/booking-logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: userName,
-          phone: userPhone,
-          pax: pax,
-          packageId: packageDetail.id,
-          packageName: packageDetail.name,
-          selectedPackageName: selectedPackageName,
-          packagePrice: selectedPackagePrice,
-          travelName: packageDetail.travel.name,
-          travelUsername: packageDetail.travel.username || null,
-          isGuest: isGuest,
-          userId: userId
-        })
-      })
-    } catch (error) {
-      console.error('Failed to log booking:', error)
-    }
-    
     const encodedText = encodeURIComponent(bookingText)
     const whatsappUrl = phone 
       ? `https://api.whatsapp.com/send?phone=${phone}&text=${encodedText}`
       : `https://api.whatsapp.com/send?text=${encodedText}`
     
-    window.open(whatsappUrl, '_blank')
+    // IMPORTANT: Redirect IMMEDIATELY to avoid Safari popup blocker
+    // Use window.location.href for better mobile compatibility
+    window.location.href = whatsappUrl
+    
+    // Track booking click in background (non-blocking)
+    fetch(`/api/packages/${packageDetail.id}/booking-click`, {
+      method: 'POST'
+    }).catch(err => console.error('Failed to track booking click:', err))
+
+    // Log booking to database in background (non-blocking)
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const user = localStorage.getItem('currentUser')
+    let userId = null
+    let isGuest = true
+    
+    if (isLoggedIn && user) {
+      try {
+        const userData = JSON.parse(user)
+        userId = userData.id || null
+        isGuest = false
+      } catch (e) {
+        console.error('Failed to parse user data:', e)
+      }
+    }
+
+    fetch('/api/admintrip/booking-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: userName,
+        phone: userPhone,
+        pax: pax,
+        packageId: packageDetail.id,
+        packageName: packageDetail.name,
+        selectedPackageName: selectedPackageName,
+        packagePrice: selectedPackagePrice,
+        travelName: packageDetail.travel.name,
+        travelUsername: packageDetail.travel.username || null,
+        isGuest: isGuest,
+        userId: userId
+      })
+    }).catch(error => console.error('Failed to log booking:', error))
   }
 
   const fetchWhatsappSettings = async () => {
