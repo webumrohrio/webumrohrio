@@ -5,6 +5,7 @@ import { PackageCard } from '@/components/package-card'
 import { PackageCardSkeleton } from '@/components/skeleton-card'
 import { EmptyState } from '@/components/empty-state'
 import { PullToRefresh } from '@/components/pull-to-refresh'
+import { LocationSelector } from '@/components/location-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -303,6 +304,15 @@ export default function PaketUmroh() {
     <MobileLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="min-h-screen bg-background">
+        {/* Location Selector */}
+        <LocationSelector 
+          onLocationSelect={(location) => {
+            setPreferredLocation(location)
+            fetchPackages(location)
+          }}
+          currentLocation={preferredLocation}
+        />
+
         {/* Header - Not sticky, will scroll */}
         <header className="bg-card border-b border-border shadow-sm">
           <div className="container mx-auto max-w-7xl px-4 md:px-6 py-3">

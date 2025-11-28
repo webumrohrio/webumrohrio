@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { LocationSelector } from '@/components/location-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -32,10 +33,11 @@ export default function TravelUmroh() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [preferredLocation, setPreferredLocation] = useState<string>('')
   const observerTarget = useRef<HTMLDivElement>(null)
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const fetchTravels = async (pageNum: number, searchTerm: string = '', isNewSearch: boolean = false) => {
+  const fetchTravels = async (pageNum: number, searchTerm: string = '', isNewSearch: boolean = false, location?: string) => {
     if (pageNum === 1) {
       setLoading(true)
     } else {
@@ -50,6 +52,12 @@ export default function TravelUmroh() {
 
       if (searchTerm) {
         params.append('search', searchTerm)
+      }
+
+      // Add location filter if available
+      const loc = location || preferredLocation
+      if (loc && loc !== 'all') {
+        params.append('city', loc)
       }
 
       const response = await fetch(`/api/travels?${params}`)
@@ -74,7 +82,14 @@ export default function TravelUmroh() {
 
   // Initial load
   useEffect(() => {
-    fetchTravels(1, '')
+    // Load preferred location from localStorage
+    const savedLocation = localStorage.getItem('preferredLocation')
+    if (savedLocation) {
+      setPreferredLocation(savedLocation)
+      fetchTravels(1, '', false, savedLocation)
+    } else {
+      fetchTravels(1, '')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -130,6 +145,16 @@ export default function TravelUmroh() {
   return (
     <MobileLayout>
       <div className="min-h-screen bg-background">
+        {/* Location Selector */}
+        <LocationSelector 
+          onLocationSelect={(location) => {
+            setPreferredLocation(location)
+            setPage(1)
+            fetchTravels(1, searchQuery, true, location)
+          }}
+          currentLocation={preferredLocation}
+        />
+
         {/* Header */}
         <header className="bg-card border-b border-border shadow-sm">
           <div className="container mx-auto max-w-7xl px-4 py-3">

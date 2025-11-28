@@ -23,8 +23,8 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
     // Check if location is already set
     const savedLocation = localStorage.getItem('preferredLocation')
     if (!savedLocation && !currentLocation) {
-      // Show modal on first visit after cities are loaded
-      setTimeout(() => setIsOpen(true), 500)
+      // Show modal immediately if no location is set
+      setIsOpen(true)
     } else if (savedLocation) {
       setSelectedLocation(savedLocation)
     }
@@ -98,16 +98,29 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
 
       {/* Selection Modal - Cannot be closed until location is selected */}
       <Dialog open={isOpen} onOpenChange={(open) => {
-        // Only allow closing if location is already selected
-        if (!open && selectedLocation) {
+        // Only allow closing if location is already selected and saved
+        const savedLocation = localStorage.getItem('preferredLocation')
+        if (!open && savedLocation) {
           setIsOpen(false)
         }
       }}>
         <DialogContent 
           className="sm:max-w-md"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
-          showCloseButton={false}
+          onPointerDownOutside={(e) => {
+            // Prevent closing by clicking outside if no location is saved
+            const savedLocation = localStorage.getItem('preferredLocation')
+            if (!savedLocation) {
+              e.preventDefault()
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Prevent closing by ESC key if no location is saved
+            const savedLocation = localStorage.getItem('preferredLocation')
+            if (!savedLocation) {
+              e.preventDefault()
+            }
+          }}
+          showCloseButton={!!localStorage.getItem('preferredLocation')}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
