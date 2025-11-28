@@ -38,7 +38,7 @@ export function BottomNavigation() {
                 <div className="absolute inset-x-0 top-0 h-0.5 bg-primary rounded-full" />
               )}
               <Icon className="w-5 h-5 mb-1" />
-              <span className="text-xs font-medium">{item.label}</span>
+              <span className="text-xs font-medium whitespace-nowrap">{item.label}</span>
             </Link>
           )
         })}
