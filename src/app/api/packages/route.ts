@@ -472,16 +472,35 @@ export async function GET(request: Request) {
     // Apply limit after sorting (limit is already a number from take variable)
     const limitedPackages = sortedPackages
 
-    // If querying by slug (detail view), increment views
+    // If querying by slug (detail view), increment views and log to tracking table
     if (slug && limitedPackages.length > 0) {
-      await db.package.update({
-        where: { id: limitedPackages[0].id },
-        data: {
-          views: {
-            increment: 1
+      const packageId = limitedPackages[0].id
+      
+      // Get IP address and user agent for tracking
+      const ipAddress = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       'unknown'
+      const userAgent = request.headers.get('user-agent') || 'unknown'
+      
+      // Increment views count and log the view
+      await Promise.all([
+        db.package.update({
+          where: { id: packageId },
+          data: {
+            views: {
+              increment: 1
+            }
           }
-        }
-      })
+        }),
+        // @ts-ignore - PackageView model exists but TypeScript may not recognize it yet
+        db.packageView.create({
+          data: {
+            packageId: packageId,
+            ipAddress: ipAddress.split(',')[0].trim(), // Get first IP if multiple
+            userAgent: userAgent.substring(0, 255) // Limit length
+          }
+        })
+      ])
     }
 
     // Parse JSON fields

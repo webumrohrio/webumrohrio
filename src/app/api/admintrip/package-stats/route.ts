@@ -28,22 +28,48 @@ export async function GET(request: Request) {
         break
     }
 
-    // Get packages created in the period
-    const packages = await db.package.findMany({
-      where: {
-        createdAt: {
-          gte: startDate
-        }
-      },
-      select: {
-        views: true,
-        bookingClicks: true
-      }
-    })
+    // Try to get data from new log tables (if they exist)
+    let totalViews = 0
+    let totalBookings = 0
+    let useLogTables = false
 
-    // Calculate totals
-    const totalViews = packages.reduce((sum, pkg) => sum + pkg.views, 0)
-    const totalBookings = packages.reduce((sum, pkg) => sum + pkg.bookingClicks, 0)
+    try {
+      // Check if log tables exist by trying to query them
+      // @ts-ignore - PackageView model exists but TypeScript may not recognize it yet
+      const viewsCount = await db.packageView.count({
+        where: {
+          createdAt: {
+            gte: startDate
+          }
+        }
+      })
+      
+      // @ts-ignore - PackageBookingClick model exists but TypeScript may not recognize it yet
+      const bookingsCount = await db.packageBookingClick.count({
+        where: {
+          createdAt: {
+            gte: startDate
+          }
+        }
+      })
+
+      totalViews = viewsCount
+      totalBookings = bookingsCount
+      useLogTables = true
+    } catch (error) {
+      // Log tables don't exist yet, fall back to cumulative counters
+      console.log('Log tables not found, using cumulative counters')
+      
+      const packages = await db.package.findMany({
+        select: {
+          views: true,
+          bookingClicks: true
+        }
+      })
+
+      totalViews = packages.reduce((sum, pkg) => sum + pkg.views, 0)
+      totalBookings = packages.reduce((sum, pkg) => sum + pkg.bookingClicks, 0)
+    }
 
     // Get favorites count in the period
     const favoritesCount = await db.favorite.count({
@@ -59,7 +85,8 @@ export async function GET(request: Request) {
       data: {
         totalViews,
         totalBookings,
-        totalFavorites: favoritesCount
+        totalFavorites: favoritesCount,
+        useLogTables // Indicates if period-accurate data is available
       }
     })
   } catch (error) {

@@ -229,6 +229,7 @@ export default function AdminDashboard() {
           </div>
           <h3 className="text-gray-600 text-sm mb-1">Total Paket di Lihat</h3>
           <p className="text-3xl font-bold text-gray-800">{stats.totalViews.toLocaleString('id-ID')}</p>
+          <p className="text-xs text-gray-400 mt-1">Kumulatif semua waktu</p>
         </Card>
 
         <Card className="p-6">
@@ -239,6 +240,7 @@ export default function AdminDashboard() {
           </div>
           <h3 className="text-gray-600 text-sm mb-1">Total Paket di Favoritkan</h3>
           <p className="text-3xl font-bold text-gray-800">{stats.totalFavorites.toLocaleString('id-ID')}</p>
+          <p className="text-xs text-gray-400 mt-1">Berdasarkan periode filter</p>
         </Card>
 
         <Card className="p-6">
@@ -249,6 +251,7 @@ export default function AdminDashboard() {
           </div>
           <h3 className="text-gray-600 text-sm mb-1">Total Paket di Booking</h3>
           <p className="text-3xl font-bold text-gray-800">{stats.totalBookings.toLocaleString('id-ID')}</p>
+          <p className="text-xs text-gray-400 mt-1">Kumulatif semua waktu</p>
         </Card>
       </div>
 

@@ -9,15 +9,38 @@ export async function GET(
   try {
     const { id } = await params
     
-    // Increment views count (using type assertion to avoid TypeScript error)
-    await db.package.update({
-      where: { id },
-      data: {
-        views: {
-          increment: 1
-        }
-      } as any
-    })
+    // Check if this is a request from admin panel (skip view tracking)
+    const { searchParams } = new URL(request.url)
+    const skipTracking = searchParams.get('skipTracking') === 'true'
+    
+    // Only track views if not from admin panel
+    if (!skipTracking) {
+      // Get IP address and user agent for tracking
+      const ipAddress = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       'unknown'
+      const userAgent = request.headers.get('user-agent') || 'unknown'
+      
+      // Increment views count and log the view
+      await Promise.all([
+        db.package.update({
+          where: { id },
+          data: {
+            views: {
+              increment: 1
+            }
+          } as any
+        }),
+        // @ts-ignore - PackageView model exists but TypeScript may not recognize it yet
+        db.packageView.create({
+          data: {
+            packageId: id,
+            ipAddress: ipAddress.split(',')[0].trim(), // Get first IP if multiple
+            userAgent: userAgent.substring(0, 255) // Limit length
+          }
+        })
+      ])
+    }
     
     const packageData = await db.package.findUnique({
       where: { id },

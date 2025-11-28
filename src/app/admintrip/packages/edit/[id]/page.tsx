@@ -90,7 +90,7 @@ export default function EditPackagePage() {
 
   const fetchPackageData = async () => {
     try {
-      const response = await fetch(`/api/packages/${params.id}`)
+      const response = await fetch(`/api/packages/${params.id}?skipTracking=true`)
       const result = await response.json()
       
       if (result.success && result.data) {

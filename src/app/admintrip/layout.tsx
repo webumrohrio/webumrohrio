@@ -82,6 +82,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAuth()
   }, [pathname, router])
 
+  // Close sidebar on desktop resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const handleLogout = async () => {
     if (confirm('Yakin ingin logout?')) {
       try {
@@ -209,13 +221,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </main>
 
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* Overlay for mobile - only show on mobile screens */}
+      <div
+        className={`lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity duration-300 ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSidebarOpen(false)}
+      />
     </div>
   )
 }
