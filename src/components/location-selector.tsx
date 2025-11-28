@@ -16,17 +16,21 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
   const [selectedLocation, setSelectedLocation] = useState(currentLocation || '')
   const [availableCities, setAvailableCities] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
     fetchAvailableCities()
     
-    // Check if location is already set
-    const savedLocation = localStorage.getItem('preferredLocation')
-    if (!savedLocation && !currentLocation) {
-      // Show modal immediately if no location is set
-      setIsOpen(true)
-    } else if (savedLocation) {
-      setSelectedLocation(savedLocation)
+    // Check if location is already set (only on client side)
+    if (typeof window !== 'undefined') {
+      const savedLocation = localStorage.getItem('preferredLocation')
+      if (!savedLocation && !currentLocation) {
+        // Show modal immediately if no location is set
+        setIsOpen(true)
+      } else if (savedLocation) {
+        setSelectedLocation(savedLocation)
+      }
     }
   }, [currentLocation])
 
@@ -71,11 +75,16 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
   }
 
   const handleSave = () => {
-    if (selectedLocation) {
+    if (selectedLocation && typeof window !== 'undefined') {
       localStorage.setItem('preferredLocation', selectedLocation)
       onLocationSelect(selectedLocation)
       setIsOpen(false)
     }
+  }
+
+  // Don't render anything until mounted (avoid SSR issues)
+  if (!isMounted) {
+    return null
   }
 
   return (
@@ -99,28 +108,34 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
       {/* Selection Modal - Cannot be closed until location is selected */}
       <Dialog open={isOpen} onOpenChange={(open) => {
         // Only allow closing if location is already selected and saved
-        const savedLocation = localStorage.getItem('preferredLocation')
-        if (!open && savedLocation) {
-          setIsOpen(false)
+        if (typeof window !== 'undefined') {
+          const savedLocation = localStorage.getItem('preferredLocation')
+          if (!open && savedLocation) {
+            setIsOpen(false)
+          }
         }
       }}>
         <DialogContent 
           className="sm:max-w-md"
           onPointerDownOutside={(e) => {
             // Prevent closing by clicking outside if no location is saved
-            const savedLocation = localStorage.getItem('preferredLocation')
-            if (!savedLocation) {
-              e.preventDefault()
+            if (typeof window !== 'undefined') {
+              const savedLocation = localStorage.getItem('preferredLocation')
+              if (!savedLocation) {
+                e.preventDefault()
+              }
             }
           }}
           onEscapeKeyDown={(e) => {
             // Prevent closing by ESC key if no location is saved
-            const savedLocation = localStorage.getItem('preferredLocation')
-            if (!savedLocation) {
-              e.preventDefault()
+            if (typeof window !== 'undefined') {
+              const savedLocation = localStorage.getItem('preferredLocation')
+              if (!savedLocation) {
+                e.preventDefault()
+              }
             }
           }}
-          showCloseButton={!!localStorage.getItem('preferredLocation')}
+          showCloseButton={isMounted && typeof window !== 'undefined' ? !!localStorage.getItem('preferredLocation') : false}
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
