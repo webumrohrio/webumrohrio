@@ -145,7 +145,7 @@ export default function TravelUmroh() {
   return (
     <MobileLayout>
       <div className="min-h-screen bg-background">
-        {/* Location Selector */}
+        {/* Location Selector - Hide badge, only show popup if no location */}
         <LocationSelector 
           onLocationSelect={(location) => {
             setPreferredLocation(location)
@@ -153,6 +153,7 @@ export default function TravelUmroh() {
             fetchTravels(1, searchQuery, true, location)
           }}
           currentLocation={preferredLocation}
+          hideBadge={true}
         />
 
         {/* Header */}

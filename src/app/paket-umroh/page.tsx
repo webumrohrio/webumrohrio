@@ -304,13 +304,14 @@ export default function PaketUmroh() {
     <MobileLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="min-h-screen bg-background">
-        {/* Location Selector */}
+        {/* Location Selector - Hide badge, only show popup if no location */}
         <LocationSelector 
           onLocationSelect={(location) => {
             setPreferredLocation(location)
             fetchPackages(location)
           }}
           currentLocation={preferredLocation}
+          hideBadge={true}
         />
 
         {/* Header - Not sticky, will scroll */}

@@ -9,9 +9,10 @@ import { Plane } from 'lucide-react'
 interface LocationSelectorProps {
   onLocationSelect: (location: string) => void
   currentLocation?: string
+  hideBadge?: boolean // Hide the location badge (but still show popup if no location selected)
 }
 
-export function LocationSelector({ onLocationSelect, currentLocation }: LocationSelectorProps) {
+export function LocationSelector({ onLocationSelect, currentLocation, hideBadge = false }: LocationSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState(currentLocation || '')
   const [availableCities, setAvailableCities] = useState<string[]>([])
@@ -89,8 +90,8 @@ export function LocationSelector({ onLocationSelect, currentLocation }: Location
 
   return (
     <>
-      {/* Location Badge - Always show */}
-      {selectedLocation && selectedLocation !== 'all' && (
+      {/* Location Badge - Only show if hideBadge is false */}
+      {!hideBadge && selectedLocation && selectedLocation !== 'all' && (
         <div className="flex items-center justify-center gap-2 py-2 px-4 bg-primary/10 border-b border-primary/20">
           <Plane className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-primary">
