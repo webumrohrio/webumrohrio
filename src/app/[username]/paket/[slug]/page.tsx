@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { PackageDetailSkeleton } from '@/components/package-detail-skeleton'
-import { ArrowLeft, MapPin, Calendar, Clock, Plane, CheckCircle, Building2, Share2, Heart, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, MapPin, Calendar, Clock, Plane, CheckCircle, Building2, Share2, Heart, ChevronLeft, ChevronRight, X, Users } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -71,6 +73,12 @@ export default function DetailPaketUmrohSlug() {
   const [alertMessage, setAlertMessage] = useState('')
   const [alertType, setAlertType] = useState<'success' | 'error'>('success')
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [bookingForm, setBookingForm] = useState({
+    name: '',
+    phone: '',
+    pax: 1
+  })
   const [whatsappSettings, setWhatsappSettings] = useState({ routing: 'travel', adminPhone: '' })
   const [currentPage, setCurrentPage] = useState(0)
   const [itemsPerPage, setItemsPerPage] = useState(4)
@@ -177,6 +185,142 @@ ${window.location.href}
   const handleBooking = () => {
     if (!packageDetail) return
 
+    // Check if user is logged in
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const user = localStorage.getItem('currentUser')
+
+    if (isLoggedIn && user) {
+      // User logged in - show modal with pre-filled data
+      const userData = JSON.parse(user)
+      let phone = userData.phone || ''
+      
+      // Ensure phone starts with 62
+      if (phone && !phone.startsWith('62')) {
+        if (phone.startsWith('0')) {
+          phone = '62' + phone.substring(1)
+        } else if (phone.startsWith('8')) {
+          phone = '62' + phone
+        }
+      }
+      
+      setBookingForm({
+        name: userData.name || '',
+        phone: phone,
+        pax: 1
+      })
+      setShowBookingModal(true)
+    } else {
+      // User not logged in - show booking modal
+      // Try to load saved data from localStorage or database
+      loadGuestBookingData()
+      setShowBookingModal(true)
+    }
+  }
+
+  const loadGuestBookingData = () => {
+    // First, try localStorage (instant)
+    const savedData = localStorage.getItem('guestBookingData')
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        let phone = data.phone || ''
+        
+        // Ensure phone starts with 62
+        if (phone && !phone.startsWith('62')) {
+          if (phone.startsWith('0')) {
+            phone = '62' + phone.substring(1)
+          } else if (phone.startsWith('8')) {
+            phone = '62' + phone
+          }
+        }
+        
+        setBookingForm({
+          name: data.name || '',
+          phone: phone,
+          pax: data.pax || 1
+        })
+      } catch (error) {
+        console.error('Failed to parse saved booking data:', error)
+      }
+    }
+  }
+
+  const handleBookingSubmit = async () => {
+    // Validate form
+    if (!bookingForm.name.trim()) {
+      setAlertMessage('Nama harus diisi')
+      setAlertType('error')
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
+
+    if (!bookingForm.phone.trim()) {
+      setAlertMessage('Nomor WhatsApp harus diisi')
+      setAlertType('error')
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
+
+    const cleanPhone = bookingForm.phone.replace(/[^0-9]/g, '')
+    
+    // Validate phone format (should start with 62 and have at least 11 digits total)
+    if (!cleanPhone.startsWith('62')) {
+      setAlertMessage('Nomor WhatsApp harus diawali dengan 62')
+      setAlertType('error')
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
+    
+    if (cleanPhone.length < 11 || cleanPhone.length > 15) {
+      setAlertMessage('Nomor WhatsApp tidak valid (11-15 digit)')
+      setAlertType('error')
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
+
+    if (bookingForm.pax < 1) {
+      setAlertMessage('Jumlah orang minimal 1')
+      setAlertType('error')
+      setShowAlert(true)
+      setTimeout(() => setShowAlert(false), 3000)
+      return
+    }
+
+    // Save to localStorage (instant)
+    localStorage.setItem('guestBookingData', JSON.stringify({
+      name: bookingForm.name,
+      phone: cleanPhone,
+      pax: bookingForm.pax
+    }))
+
+    // Save to database (background)
+    try {
+      await fetch('/api/guest-booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: bookingForm.name,
+          phone: cleanPhone,
+          defaultPax: bookingForm.pax
+        })
+      })
+    } catch (error) {
+      console.error('Failed to save to database:', error)
+      // Continue anyway - localStorage is enough
+    }
+
+    // Close modal and proceed to WhatsApp
+    setShowBookingModal(false)
+    proceedToWhatsApp(bookingForm.name, cleanPhone, bookingForm.pax)
+  }
+
+  const proceedToWhatsApp = async (userName: string, userPhone: string, pax: number) => {
+    if (!packageDetail) return
+
     const departureDate = new Date(packageDetail.departureDate).toLocaleDateString('id-ID', {
       day: 'numeric',
       month: 'long',
@@ -201,9 +345,13 @@ ${window.location.href}
 
     const bookingText = `Halo ${recipientName},
 
-Mohon info Paket Umroh
+Saya ingin booking Paket Umroh
 
 *${packageDetail.name}*
+
+👤 Nama: ${userName}
+📱 WhatsApp: ${userPhone}
+👥 Jumlah Jamaah: ${pax} orang
 
 🏢 ${packageDetail.travel.name}
 ⏱️ Durasi: ${packageDetail.duration}
@@ -222,6 +370,44 @@ Terima kasih.`
     fetch(`/api/packages/${packageDetail.id}/booking-click`, {
       method: 'POST'
     }).catch(err => console.error('Failed to track booking click:', err))
+
+    // Log booking to database
+    try {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+      const user = localStorage.getItem('currentUser')
+      let userId = null
+      let isGuest = true
+      
+      if (isLoggedIn && user) {
+        try {
+          const userData = JSON.parse(user)
+          userId = userData.id || null
+          isGuest = false
+        } catch (e) {
+          console.error('Failed to parse user data:', e)
+        }
+      }
+
+      await fetch('/api/admintrip/booking-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userName,
+          phone: userPhone,
+          pax: pax,
+          packageId: packageDetail.id,
+          packageName: packageDetail.name,
+          selectedPackageName: selectedPackageName,
+          packagePrice: selectedPackagePrice,
+          travelName: packageDetail.travel.name,
+          travelUsername: packageDetail.travel.username || null,
+          isGuest: isGuest,
+          userId: userId
+        })
+      })
+    } catch (error) {
+      console.error('Failed to log booking:', error)
+    }
     
     const encodedText = encodeURIComponent(bookingText)
     const whatsappUrl = phone 
@@ -424,6 +610,149 @@ Terima kasih.`
             </div>
           </div>
         )}
+
+        {/* Booking Modal */}
+        {showBookingModal && (() => {
+          const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+          
+          return (
+            <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center animate-in fade-in duration-200">
+              <div 
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setShowBookingModal(false)}
+              ></div>
+              
+              <div className="relative bg-card rounded-t-3xl md:rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in slide-in-from-bottom md:zoom-in-95 duration-300">
+                <button
+                  onClick={() => setShowBookingModal(false)}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                </div>
+                
+                <h3 className="text-xl font-bold text-center mb-2">Booking Paket Umroh</h3>
+                
+                {isLoggedIn && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700 text-center">
+                      ✓ Data Anda sudah terisi otomatis dari profil
+                    </p>
+                  </div>
+                )}
+                
+                <p className="text-center text-sm text-muted-foreground mb-6">
+                  Kami akan menghubungkan Anda ke Travel Paket Umroh yang Anda pilih. {!isLoggedIn && 'Mohon isi data berikut:'}
+                </p>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="booking-name" className="text-sm font-medium mb-2 block">
+                      Nama Lengkap <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="booking-name"
+                      type="text"
+                      placeholder="Masukkan nama lengkap"
+                      value={bookingForm.name}
+                      onChange={(e) => setBookingForm({ ...bookingForm, name: e.target.value })}
+                      disabled={isLoggedIn}
+                      className="w-full disabled:opacity-70 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="booking-phone" className="text-sm font-medium mb-2 block">
+                      Nomor WhatsApp <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">
+                        +62
+                      </div>
+                      <Input
+                        id="booking-phone"
+                        type="tel"
+                        placeholder="8123456789"
+                        value={bookingForm.phone.startsWith('62') ? bookingForm.phone.substring(2) : bookingForm.phone.startsWith('0') ? bookingForm.phone.substring(1) : bookingForm.phone}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^0-9]/g, '')
+                          setBookingForm({ ...bookingForm, phone: '62' + value })
+                        }}
+                        disabled={isLoggedIn}
+                        className="w-full pl-12 disabled:opacity-70 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    {!isLoggedIn && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Format: +62 8123456789 (tanpa 0 di depan)
+                      </p>
+                    )}
+                  </div>
+
+                <div>
+                  <Label htmlFor="booking-pax" className="text-sm font-medium mb-2 block">
+                    Jumlah Jamaah <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setBookingForm({ ...bookingForm, pax: Math.max(1, bookingForm.pax - 1) })}
+                      disabled={bookingForm.pax <= 1}
+                    >
+                      -
+                    </Button>
+                    <div className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border rounded-lg bg-muted/30">
+                      <Users className="w-4 h-4 text-primary" />
+                      <span className="text-lg font-bold">{bookingForm.pax}</span>
+                      <span className="text-sm text-muted-foreground">orang</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setBookingForm({ ...bookingForm, pax: bookingForm.pax + 1 })}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowBookingModal(false)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                  onClick={handleBookingSubmit}
+                >
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                  Kirim ke WhatsApp
+                </Button>
+              </div>
+
+              {!isLoggedIn && (
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  Data Anda akan disimpan untuk mempermudah booking selanjutnya
+                </p>
+              )}
+            </div>
+          </div>
+          )
+        })()}
 
         {/* Notification */}
         {showAlert && (
@@ -868,34 +1197,36 @@ Terima kasih.`
 
         </div>
 
-        {/* Bottom CTA */}
-        <div className="sticky bottom-0 bg-white border-t p-4 shadow-lg z-50">
-          <div className="container mx-auto max-w-7xl">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs text-muted-foreground">{selectedPrice?.name || 'Harga'}</p>
-                <p className="text-lg md:text-xl font-bold text-primary">
-                  {selectedPrice ? formatCurrency(selectedPrice.price) : formatCurrency(packageDetail.price)}
-                </p>
-                {((selectedPrice?.cashback && selectedPrice.cashback > 0) || (!selectedPrice && packageDetail.cashback && packageDetail.cashback > 0)) && (
-                  <p className="text-xs text-orange-600 font-medium mt-0.5">
-                    💰 Cashback {formatCurrency((selectedPrice?.cashback && selectedPrice.cashback > 0) ? selectedPrice.cashback : (packageDetail.cashback || 0))}
+        {/* Bottom CTA - Hidden when modal is open */}
+        {!showBookingModal && (
+          <div className="sticky bottom-0 bg-white border-t p-4 shadow-lg z-50">
+            <div className="container mx-auto max-w-7xl">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">{selectedPrice?.name || 'Harga'}</p>
+                  <p className="text-lg md:text-xl font-bold text-primary">
+                    {selectedPrice ? formatCurrency(selectedPrice.price) : formatCurrency(packageDetail.price)}
                   </p>
-                )}
+                  {((selectedPrice?.cashback && selectedPrice.cashback > 0) || (!selectedPrice && packageDetail.cashback && packageDetail.cashback > 0)) && (
+                    <p className="text-xs text-orange-600 font-medium mt-0.5">
+                      💰 Cashback {formatCurrency((selectedPrice?.cashback && selectedPrice.cashback > 0) ? selectedPrice.cashback : (packageDetail.cashback || 0))}
+                    </p>
+                  )}
+                </div>
+                <Button 
+                  size="lg"
+                  onClick={handleBooking}
+                  className="flex-1 md:flex-none md:px-12 bg-gradient-to-r from-primary to-green-600 hover:from-green-600 hover:to-primary text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                  </svg>
+                  Booking Sekarang
+                </Button>
               </div>
-              <Button 
-                size="lg"
-                onClick={handleBooking}
-                className="flex-1 md:flex-none md:px-12 bg-gradient-to-r from-primary to-green-600 hover:from-green-600 hover:to-primary text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-                Booking Sekarang
-              </Button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </MobileLayout>
   )

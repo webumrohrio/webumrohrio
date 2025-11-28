@@ -42,7 +42,8 @@ export default function AdminDashboard() {
     totalUsers: 0,
     totalViews: 0,
     totalFavorites: 0,
-    totalBookings: 0
+    totalBookings: 0,
+    totalBookingLogs: 0
   })
   const [recentPackages, setRecentPackages] = useState<PackageData[]>([])
   const [recentTravels, setRecentTravels] = useState<TravelData[]>([])
@@ -71,12 +72,13 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [travelsRes, packagesRes, articlesRes, usersRes, packageStatsRes] = await Promise.all([
+      const [travelsRes, packagesRes, articlesRes, usersRes, packageStatsRes, bookingLogsRes] = await Promise.all([
         fetch(`/api/travels?period=${period}`),
         fetch(`/api/packages?period=${period}`),
         fetch(`/api/articles?period=${period}`),
         fetch(`/api/users?period=${period}`),
-        fetch(`/api/admintrip/package-stats?period=${period}`)
+        fetch(`/api/admintrip/package-stats?period=${period}`),
+        fetch(`/api/admintrip/booking-logs?page=1&pageSize=1&period=${period}`)
       ])
 
       const travelsData = await travelsRes.json()
@@ -84,6 +86,7 @@ export default function AdminDashboard() {
       const articlesData = await articlesRes.json()
       const usersData = await usersRes.json()
       const packageStatsData = await packageStatsRes.json()
+      const bookingLogsData = await bookingLogsRes.json()
 
       setStats({
         totalTravels: travelsData.total || travelsData.data?.length || 0,
@@ -92,7 +95,8 @@ export default function AdminDashboard() {
         totalUsers: usersData.total || usersData.data?.length || 0,
         totalViews: packageStatsData.success ? packageStatsData.data.totalViews : 0,
         totalFavorites: packageStatsData.success ? packageStatsData.data.totalFavorites : 0,
-        totalBookings: packageStatsData.success ? packageStatsData.data.totalBookings : 0
+        totalBookings: packageStatsData.success ? packageStatsData.data.totalBookings : 0,
+        totalBookingLogs: bookingLogsData.success ? bookingLogsData.pagination.total : 0
       })
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -245,13 +249,13 @@ export default function AdminDashboard() {
 
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 rounded-lg bg-indigo-500 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-white" />
             </div>
           </div>
-          <h3 className="text-gray-600 text-sm mb-1">Total Paket di Booking</h3>
-          <p className="text-3xl font-bold text-gray-800">{stats.totalBookings.toLocaleString('id-ID')}</p>
-          <p className="text-xs text-gray-400 mt-1">Kumulatif semua waktu</p>
+          <h3 className="text-gray-600 text-sm mb-1">Total Booking</h3>
+          <p className="text-3xl font-bold text-gray-800">{stats.totalBookingLogs.toLocaleString('id-ID')}</p>
+          <p className="text-xs text-gray-400 mt-1">Berdasarkan periode filter</p>
         </Card>
       </div>
 

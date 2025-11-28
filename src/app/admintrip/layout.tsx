@@ -14,7 +14,8 @@ import {
   Database,
   LogOut,
   Menu,
-  X
+  X,
+  ShoppingBag
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ const menuItems = [
   { icon: FileText, label: 'Artikel', href: '/admintrip/articles' },
   { icon: Video, label: 'Video', href: '/admintrip/videos' },
   { icon: ImageIcon, label: 'Gambar Slider', href: '/admintrip/sliders' },
+  { icon: ShoppingBag, label: 'Data Booking', href: '/admintrip/bookings' },
   { icon: Database, label: 'Backup Data', href: '/admintrip/backup' },
   { icon: Settings, label: 'Pengaturan', href: '/admintrip/settings' },
   { icon: Users, label: 'Akun Pengguna', href: '/admintrip/users' },

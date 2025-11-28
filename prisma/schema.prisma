@@ -261,3 +261,36 @@ model PackageBookingClick {
   @@index([packageId])
   @@index([createdAt])
 }
+
+model GuestBooking {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String   @unique
+  defaultPax  Int      @default(1)
+  lastUsed    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([phone])
+}
+
+model BookingLog {
+  id                  String   @id @default(cuid())
+  name                String
+  phone               String
+  pax                 Int
+  packageId           String
+  packageName         String
+  selectedPackageName String?
+  packagePrice        Int?
+  travelName          String
+  travelUsername      String?
+  isGuest             Boolean  @default(true)
+  userId              String?
+  createdAt           DateTime @default(now())
+
+  @@index([packageId])
+  @@index([phone])
+  @@index([createdAt])
+  @@index([userId])
+}
