@@ -37,7 +37,7 @@ export default function BookingsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
-  const [period, setPeriod] = useState<'all' | 'day' | 'week' | 'month' | 'year'>('all')
+  const [period, setPeriod] = useState<'all' | 'day' | 'week' | 'month' | 'year'>('day')
 
   useEffect(() => {
     fetchBookings()
