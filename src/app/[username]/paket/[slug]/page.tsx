@@ -645,7 +645,7 @@ Terima kasih.`
                 )}
                 
                 <p className="text-center text-sm text-muted-foreground mb-6">
-                  Kami akan menghubungkan Anda ke Travel Paket Umroh yang Anda pilih. {!isLoggedIn && 'Mohon isi data berikut:'}
+                  Kami akan menghubungkan Anda ke Travel Paket Umroh yang Anda pilih.
                 </p>
                 
                 <div className="space-y-4">
@@ -685,11 +685,6 @@ Terima kasih.`
                         className="w-full pl-12 disabled:opacity-70 disabled:cursor-not-allowed"
                       />
                     </div>
-                    {!isLoggedIn && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Format: +62 8123456789 (tanpa 0 di depan)
-                      </p>
-                    )}
                   </div>
 
                 <div>
@@ -913,19 +908,19 @@ Terima kasih.`
           </Card>
 
           {/* Tabs */}
-          <Tabs defaultValue="itinerary" className="w-full">
+          <Tabs defaultValue="facilities" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-xl h-auto">
-              <TabsTrigger 
-                value="itinerary" 
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all py-2.5 font-medium"
-              >
-                Itinerary
-              </TabsTrigger>
               <TabsTrigger 
                 value="facilities" 
                 className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all py-2.5 font-medium"
               >
                 Fasilitas
+              </TabsTrigger>
+              <TabsTrigger 
+                value="itinerary" 
+                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md transition-all py-2.5 font-medium"
+              >
+                Itinerary
               </TabsTrigger>
             </TabsList>
 
