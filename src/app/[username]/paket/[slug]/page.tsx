@@ -877,9 +877,9 @@ Terima kasih.`
                 <p className="text-lg md:text-xl font-bold text-primary">
                   {selectedPrice ? formatCurrency(selectedPrice.price) : formatCurrency(packageDetail.price)}
                 </p>
-                {((selectedPrice && selectedPrice.cashback && selectedPrice.cashback > 0) || (!selectedPrice && packageDetail.cashback && packageDetail.cashback > 0)) && (
+                {((selectedPrice?.cashback && selectedPrice.cashback > 0) || (!selectedPrice && packageDetail.cashback && packageDetail.cashback > 0)) && (
                   <p className="text-xs text-orange-600 font-medium mt-0.5">
-                    💰 Cashback {formatCurrency(selectedPrice?.cashback || packageDetail.cashback || 0)}
+                    💰 Cashback {formatCurrency((selectedPrice?.cashback && selectedPrice.cashback > 0) ? selectedPrice.cashback : (packageDetail.cashback || 0))}
                   </p>
                 )}
               </div>
