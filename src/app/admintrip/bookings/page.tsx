@@ -37,15 +37,17 @@ export default function BookingsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [period, setPeriod] = useState<'all' | 'day' | 'week' | 'month' | 'year'>('all')
 
   useEffect(() => {
     fetchBookings()
-  }, [currentPage])
+  }, [currentPage, period])
 
   const fetchBookings = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admintrip/booking-logs?page=${currentPage}&pageSize=50`)
+      const periodParam = period !== 'all' ? `&period=${period}` : ''
+      const response = await fetch(`/api/admintrip/booking-logs?page=${currentPage}&pageSize=50${periodParam}`)
       const result = await response.json()
 
       if (result.success) {
@@ -114,6 +116,63 @@ export default function BookingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Filter Period */}
+      <Card className="p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-medium text-gray-600">Filter Periode:</span>
+          <Button
+            variant={period === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setPeriod('all')
+              setCurrentPage(1)
+            }}
+          >
+            Semua
+          </Button>
+          <Button
+            variant={period === 'day' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setPeriod('day')
+              setCurrentPage(1)
+            }}
+          >
+            Hari Ini
+          </Button>
+          <Button
+            variant={period === 'week' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setPeriod('week')
+              setCurrentPage(1)
+            }}
+          >
+            Minggu Ini
+          </Button>
+          <Button
+            variant={period === 'month' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setPeriod('month')
+              setCurrentPage(1)
+            }}
+          >
+            Bulan Ini
+          </Button>
+          <Button
+            variant={period === 'year' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setPeriod('year')
+              setCurrentPage(1)
+            }}
+          >
+            Tahun Ini
+          </Button>
+        </div>
+      </Card>
 
       {/* Search */}
       <Card className="p-4">
