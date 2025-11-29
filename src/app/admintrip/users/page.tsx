@@ -51,6 +51,7 @@ interface TravelAdmin {
   username: string
   password: string
   isPasswordHashed?: boolean
+  logo?: string | null
   createdAt: string
   lastLogin: string | null
 }
@@ -1056,11 +1057,21 @@ export default function UsersPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                                <span className="text-white font-semibold text-sm">
-                                  {travelAdmin.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
+                              {travelAdmin.logo ? (
+                                <Image
+                                  src={travelAdmin.logo}
+                                  alt={travelAdmin.name}
+                                  width={40}
+                                  height={40}
+                                  className="h-10 w-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+                                  <span className="text-white font-semibold text-sm">
+                                    {travelAdmin.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">
