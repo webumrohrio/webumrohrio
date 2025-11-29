@@ -319,19 +319,20 @@ export default function TravelPackagesPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Favorit</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Booking</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keberangkatan</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal Dibuat</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
                     Memuat data...
                   </td>
                 </tr>
               ) : filteredPackages.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={10} className="px-6 py-12 text-center text-gray-500">
                     {search ? 'Tidak ada paket yang cocok' : 'Belum ada paket'}
                   </td>
                 </tr>
@@ -411,6 +412,21 @@ export default function TravelPackagesPage() {
                             Sudah Berangkat
                           </span>
                         )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {new Date(pkg.createdAt).toLocaleDateString('id-ID', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(pkg.createdAt).toLocaleTimeString('id-ID', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
