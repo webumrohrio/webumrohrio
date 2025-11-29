@@ -32,6 +32,7 @@ interface Package {
   bookingClicks: number
   cashback?: number
   isActive: boolean
+  createdAt: string
 }
 
 export default function TravelPackagesPage() {
@@ -132,7 +133,12 @@ export default function TravelPackagesPage() {
           console.log('✅ All packages verified to belong to this travel')
         }
         
-        setPackages(result.data)
+        // Sort packages by createdAt (newest first)
+        const sortedPackages = result.data.sort((a: any, b: any) => {
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        })
+        
+        setPackages(sortedPackages)
       }
     } catch (error) {
       console.error('Failed to fetch packages:', error)
