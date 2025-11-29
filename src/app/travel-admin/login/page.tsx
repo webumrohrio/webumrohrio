@@ -139,6 +139,7 @@ Terima kasih.`
               className="w-full"
               disabled={loading}
               autoComplete="username"
+              name="username"
             />
           </div>
 
@@ -155,6 +156,8 @@ Terima kasih.`
                 required
                 className="w-full pr-10"
                 disabled={loading}
+                autoComplete="current-password"
+                name="password"
               />
               <button
                 type="button"
