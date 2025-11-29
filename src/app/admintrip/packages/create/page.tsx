@@ -273,7 +273,13 @@ export default function CreatePackagePage() {
   }
 
   const removeItinerary = (index: number) => {
-    setItinerary(itinerary.filter((_, i) => i !== index))
+    const filtered = itinerary.filter((_, i) => i !== index)
+    // Re-number the days sequentially
+    const renumbered = filtered.map((item, idx) => ({
+      ...item,
+      day: idx + 1
+    }))
+    setItinerary(renumbered)
   }
 
   return (
