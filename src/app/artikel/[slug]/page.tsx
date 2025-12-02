@@ -460,7 +460,7 @@ ${window.location.href}
         {/* Header with Progress Bar */}
         <header className="bg-white shadow-sm sticky top-0 z-40">
           <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+            <Button variant="ghost" size="sm" onClick={() => router.push('/artikel')}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-lg font-bold text-primary">Detail Artikel</h1>
