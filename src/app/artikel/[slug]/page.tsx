@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { ArticleSEO } from '@/components/article-seo'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -393,6 +394,9 @@ ${window.location.href}
 
   return (
     <MobileLayout hideBottomNav>
+      {/* SEO Component */}
+      {article && <ArticleSEO article={article} />}
+      
       <div className="min-h-screen bg-gray-50">
         {/* Login Modal */}
         {showLoginModal && (
@@ -491,10 +495,11 @@ ${window.location.href}
           <div className="relative aspect-[16/9] rounded-2xl overflow-hidden">
             <Image
               src={article.image}
-              alt={article.title}
+              alt={`${article.title} - Artikel Umroh oleh ${article.travelName}`}
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
             />
           </div>
 
