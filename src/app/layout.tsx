@@ -86,18 +86,6 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: settings.favicon,
       apple: settings.favicon,
     },
-    openGraph: {
-      title: settings.title,
-      description: "Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya",
-      url: "https://tripbaitullah.com",
-      siteName: settings.title,
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: settings.title,
-      description: "Aplikasi web untuk menemukan paket umroh dari berbagai travel penyelenggara terpercaya",
-    },
   }
 }
 
