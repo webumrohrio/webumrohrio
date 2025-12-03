@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { ArticleListSEO } from '@/components/article-list-seo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -88,6 +89,7 @@ export default function Artikel() {
 
   return (
     <MobileLayout>
+      <ArticleListSEO />
       <div className="min-h-screen bg-background">
         {/* Header - Will scroll away */}
         <header className="bg-card border-b border-border shadow-sm">
