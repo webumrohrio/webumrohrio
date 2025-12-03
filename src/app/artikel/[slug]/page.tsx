@@ -1,6 +1,8 @@
 import { MobileLayout } from '@/components/mobile-layout'
 import { ArticleInteractions } from '@/components/article-interactions'
 import { ArticleComments } from '@/components/article-comments'
+import { ArticleRelated } from '@/components/article-related'
+import { ArticleViewTracker } from '@/components/article-view-tracker'
 import { ReadProgress } from '@/components/read-progress'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -82,6 +84,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
+      {/* View Tracker */}
+      <ArticleViewTracker articleId={article.id} />
+      
       <div className="min-h-screen bg-gray-50">
         {/* Header with Progress Bar */}
         <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -153,6 +158,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Comments Section */}
           <ArticleComments articleId={article.id} />
+
+          {/* Related Articles */}
+          <ArticleRelated currentArticleId={article.id} tags={article.tags} />
         </div>
       </div>
     </MobileLayout>
