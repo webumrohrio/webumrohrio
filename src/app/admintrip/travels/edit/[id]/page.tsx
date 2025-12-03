@@ -495,11 +495,25 @@ export default function EditTravelPage() {
         }
       })
 
-      // Prepare travel data
+      // Prepare travel data (exclude username and password fields)
       const travelData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         logo: logoUrl,
         coverImage: coverUrl,
+        address: formData.address,
+        city: formData.city,
+        phone: formData.phone,
+        email: formData.email,
+        website: formData.website,
+        instagram: formData.instagram,
+        rating: formData.rating,
+        totalReviews: formData.totalReviews,
+        totalJamaah: formData.totalJamaah,
+        yearEstablished: formData.yearEstablished,
+        packageLimit: formData.packageLimit,
+        isActive: formData.isActive,
+        isVerified: formData.isVerified,
         gallery: galleryWithCaptions,
         licenses: formData.licenses.split(',').map(s => s.trim()).filter(Boolean),
         facilities: formData.facilities.split(',').map(s => s.trim()).filter(Boolean),
