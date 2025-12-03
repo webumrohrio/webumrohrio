@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { TravelListSEO } from '@/components/travel-list-seo'
 import { LocationSelector } from '@/components/location-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -144,6 +145,7 @@ export default function TravelUmroh() {
 
   return (
     <MobileLayout>
+      <TravelListSEO />
       <div className="min-h-screen bg-background">
         {/* Location Selector - Hide badge, only show popup if no location */}
         <LocationSelector 
