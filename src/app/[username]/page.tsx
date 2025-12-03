@@ -608,17 +608,15 @@ ${window.location.href}
                     <p className="text-sm text-gray-800 font-medium break-all">{travel.email}</p>
                   </div>
                 </div>
-                {travel.instagram && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                      <Instagram className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Instagram</p>
-                      <p className="text-sm text-gray-800 font-medium">{travel.instagram}</p>
-                    </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <Instagram className="w-5 h-5 text-green-600" />
                   </div>
-                )}
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Instagram</p>
+                    <p className="text-sm text-gray-800 font-medium">{travel.instagram || '-'}</p>
+                  </div>
+                </div>
               </div>
 
               {/* Right Column */}
