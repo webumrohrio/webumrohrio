@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { PackageListSEO } from '@/components/package-list-seo'
 import { PackageCard } from '@/components/package-card'
 import { PackageCardSkeleton } from '@/components/skeleton-card'
 import { EmptyState } from '@/components/empty-state'
@@ -302,6 +303,7 @@ export default function PaketUmroh() {
 
   return (
     <MobileLayout>
+      <PackageListSEO />
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="min-h-screen bg-background">
         {/* Location Selector - Hide badge, only show popup if no location */}
