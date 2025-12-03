@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { HomepageSEO } from '@/components/homepage-seo'
 import { ImageSlider } from '@/components/image-slider'
 import { PackageCard } from '@/components/package-card'
 import { TravelCard } from '@/components/travel-card'
@@ -416,6 +417,7 @@ export default function Home() {
 
   return (
     <MobileLayout>
+      <HomepageSEO />
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="min-h-screen bg-[#f7f9fa]">
         {/* Mobile Header - Sticky with blur effect */}
