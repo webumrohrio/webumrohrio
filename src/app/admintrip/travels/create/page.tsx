@@ -559,13 +559,12 @@ export default function CreateTravelPage() {
           <h3 className="text-lg font-bold mb-4">Informasi Kontak</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Email *</label>
+              <label className="text-sm font-medium mb-2 block">Email</label>
               <Input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder="info@safira.com"
-                required
               />
             </div>
             <div>
@@ -583,12 +582,11 @@ export default function CreateTravelPage() {
               </p>
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Telepon *</label>
+              <label className="text-sm font-medium mb-2 block">Telepon</label>
               <Input
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 placeholder="+62 61 9876543"
-                required
               />
             </div>
             <div>
@@ -608,12 +606,11 @@ export default function CreateTravelPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium mb-2 block">Alamat *</label>
+              <label className="text-sm font-medium mb-2 block">Alamat</label>
               <Input
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
                 placeholder="Jl. Gatot Subroto No. 789, Medan"
-                required
               />
             </div>
           </div>

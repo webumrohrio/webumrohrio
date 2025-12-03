@@ -759,20 +759,20 @@ export default function EditTravelPage() {
           <h3 className="text-lg font-bold mb-4">Informasi Kontak</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Email *</label>
+              <label className="text-sm font-medium mb-2 block">Email</label>
               <Input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                required
+                placeholder="email@example.com"
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">Telepon *</label>
+              <label className="text-sm font-medium mb-2 block">Telepon</label>
               <Input
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                required
+                placeholder="08123456789"
               />
             </div>
             <div>
@@ -792,11 +792,11 @@ export default function EditTravelPage() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="text-sm font-medium mb-2 block">Alamat *</label>
+              <label className="text-sm font-medium mb-2 block">Alamat</label>
               <Input
                 value={formData.address}
                 onChange={(e) => setFormData({...formData, address: e.target.value})}
-                required
+                placeholder="Jl. Contoh No. 123, Kota"
               />
             </div>
           </div>
