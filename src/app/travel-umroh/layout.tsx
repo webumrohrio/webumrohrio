@@ -1,7 +1,7 @@
-import { metadata } from './metadata'
+import { generateMetadata } from './metadata'
 
 // Export metadata
-export { metadata }
+export { generateMetadata as metadata }
 
 export default function TravelUmrohLayout({
   children,
