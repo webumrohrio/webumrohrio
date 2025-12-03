@@ -16,8 +16,8 @@ interface MobileLayoutProps {
 
 const menuItems = [
   { icon: Home, label: 'Home', href: '/' },
-  { icon: PlaneTakeoff, label: 'Paket Umroh', href: '/paket-umroh' },
-  { icon: Users, label: 'Travel Umroh', href: '/travel-umroh' },
+  { icon: PlaneTakeoff, label: 'Paket Umroh', href: '/paket-umroh' }, // Full label for desktop
+  { icon: Users, label: 'Travel Umroh', href: '/travel-umroh' }, // Full label for desktop
   { icon: FileText, label: 'Artikel', href: '/artikel' },
   { icon: User, label: 'Profile', href: '/profile' },
 ]
