@@ -253,7 +253,7 @@ export default function AdminDashboard() {
               <ShoppingCart className="w-6 h-6 text-white" />
             </div>
           </div>
-          <h3 className="text-gray-600 text-sm mb-1">Total Booking</h3>
+          <h3 className="text-gray-600 text-sm mb-1">Total Paket di Pilih</h3>
           <p className="text-3xl font-bold text-gray-800">{stats.totalBookingLogs.toLocaleString('id-ID')}</p>
           <p className="text-xs text-gray-400 mt-1">Berdasarkan periode filter</p>
         </Card>
