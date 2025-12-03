@@ -3,10 +3,11 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function generateArticleMetadata(slug: string): Promise<Metadata> {
+// Generate metadata for the page
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
     const article = await prisma.article.findUnique({
-      where: { slug },
+      where: { slug: params.slug },
       include: {
         travel: true,
         admin: true
@@ -24,14 +25,14 @@ export async function generateArticleMetadata(slug: string): Promise<Metadata> {
     const articleUrl = `https://www.tripbaitullah.com/artikel/${article.slug}`
     
     // Ensure image is absolute URL
-    const imageUrl = article.image.startsWith('http') 
-      ? article.image 
-      : `https://www.tripbaitullah.com${article.image}`
+    const imageUrl = article.image 
+      ? (article.image.startsWith('http') ? article.image : `https://www.tripbaitullah.com${article.image}`)
+      : 'https://www.tripbaitullah.com/logo.png'
 
     return {
       title: `${article.title} | Tripbaitullah`,
       description: article.excerpt || article.title,
-      keywords: article.tags.split(',').map(tag => tag.trim()),
+      keywords: article.tags ? article.tags.split(',').map(tag => tag.trim()) : [],
       authors: [{ name: authorName }],
       openGraph: {
         title: article.title,
@@ -51,7 +52,7 @@ export async function generateArticleMetadata(slug: string): Promise<Metadata> {
         publishedTime: article.createdAt.toISOString(),
         modifiedTime: article.updatedAt.toISOString(),
         authors: [authorName],
-        tags: article.tags.split(',').map(tag => tag.trim()),
+        tags: article.tags ? article.tags.split(',').map(tag => tag.trim()) : [],
       },
       twitter: {
         card: 'summary_large_image',
@@ -69,6 +70,46 @@ export async function generateArticleMetadata(slug: string): Promise<Metadata> {
       title: 'Artikel | Tripbaitullah',
       description: 'Baca artikel menarik seputar umroh dan perjalanan ibadah'
     }
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+// Get article data for server component
+export async function getArticle(slug: string) {
+  try {
+    const article = await prisma.article.findUnique({
+      where: { slug },
+      include: {
+        travel: true,
+        admin: true
+      }
+    })
+
+    if (!article) {
+      return null
+    }
+
+    const authorName = article.admin?.name || article.travel?.name || 'Tripbaitullah'
+    const travelName = article.travel?.name || 'Tripbaitullah'
+
+    return {
+      id: article.id,
+      slug: article.slug,
+      title: article.title,
+      content: article.content || '',
+      excerpt: article.excerpt || '',
+      image: article.image || '/logo.png',
+      tags: article.tags || '',
+      views: article.views,
+      createdAt: article.createdAt.toISOString(),
+      updatedAt: article.updatedAt.toISOString(),
+      author: authorName,
+      travelName: travelName
+    }
+  } catch (error) {
+    console.error('Error fetching article:', error)
+    return null
   } finally {
     await prisma.$disconnect()
   }
