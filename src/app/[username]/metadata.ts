@@ -113,6 +113,7 @@ export async function getTravel(username: string) {
       phone: travel.phone || '',
       email: travel.email || '',
       website: travel.website || '',
+      instagram: travel.instagram || '',
       rating: travel.rating || 0,
       totalReviews: 0, // Can be calculated if you have reviews table
       totalJamaah: 0, // Can be calculated from bookings

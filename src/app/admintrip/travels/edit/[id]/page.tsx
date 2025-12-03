@@ -28,6 +28,7 @@ export default function EditTravelPage() {
     phone: '',
     email: '',
     website: '',
+    instagram: '',
     rating: 4.5,
     totalReviews: 0,
     totalJamaah: 0,

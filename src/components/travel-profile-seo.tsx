@@ -13,6 +13,7 @@ interface TravelProfileSEOProps {
     phone: string
     email: string
     website: string
+    instagram: string
     rating: number
     isVerified: boolean
   }
@@ -48,7 +49,10 @@ export function TravelProfileSEO({ travel }: TravelProfileSEOProps) {
         bestRating: 5,
         worstRating: 1
       } : undefined,
-      sameAs: travel.website ? [travel.website] : []
+      sameAs: [
+        travel.website,
+        travel.instagram ? (travel.instagram.startsWith('http') ? travel.instagram : `https://instagram.com/${travel.instagram.replace('@', '')}`) : null
+      ].filter(Boolean)
     }
 
     // Add breadcrumb
