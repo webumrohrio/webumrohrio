@@ -333,7 +333,7 @@ export default function TravelAdminDashboard() {
             <p className="text-white/90 text-sm">Conversion Rate</p>
             <p className="text-4xl font-bold mt-2">{conversionRate}%</p>
             <p className="text-white/80 text-sm mt-1">
-              Dari {stats.totalViews} views → {stats.totalBookingClicks} booking clicks
+              Dari {stats.totalViews} views → {stats.totalBookingClicks} Paket di Pilih
             </p>
           </div>
           <TrendingUp className="w-16 h-16 text-white/30" />
