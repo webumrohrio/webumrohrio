@@ -1150,7 +1150,7 @@ Terima kasih.`
                         <p className="text-2xl md:text-3xl font-bold text-primary">{formatCurrency(option.price)}</p>
                         <p className="text-xs text-muted-foreground">per orang</p>
                       </div>
-                      {option.cashback && option.cashback > 0 && (
+                      {option.cashback != null && option.cashback > 0 && (
                         <div className="mt-1 inline-block">
                           <Badge className="bg-orange-100 text-orange-600 border border-orange-300">
                             💰 Cashback {formatCurrency(option.cashback)}
