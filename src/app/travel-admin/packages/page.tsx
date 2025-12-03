@@ -257,7 +257,7 @@ export default function TravelPackagesPage() {
           <p className="text-2xl font-bold text-red-600">{stats.totalFavorites.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-gray-600">Klik Booking</p>
+          <p className="text-sm text-gray-600">Paket di Pilih</p>
           <p className="text-2xl font-bold text-orange-600">{stats.totalBookingClicks.toLocaleString()}</p>
         </Card>
       </div>

@@ -262,7 +262,7 @@ export default function TravelAdminDashboard() {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Klik Booking</p>
+              <p className="text-sm text-gray-600">Paket di Pilih</p>
               <p className="text-3xl font-bold text-orange-600 mt-2">
                 {stats.totalBookingClicks.toLocaleString()}
               </p>
