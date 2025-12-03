@@ -15,7 +15,7 @@ interface TravelProfileSEOProps {
     website: string
     instagram: string
     rating: number
-    isVerified: boolean
+    isVerified?: boolean
   }
 }
 

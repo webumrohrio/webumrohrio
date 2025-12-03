@@ -21,7 +21,8 @@ import {
   ChevronLeft,
   ChevronRight,
   PlaneTakeoff,
-  Shield
+  Shield,
+  Instagram
 } from 'lucide-react'
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -420,79 +421,6 @@ ${window.location.href}
               })}
             </div>
 
-            {/* Contact Information */}
-            {(travel.address || travel.phone || travel.email || travel.website || travel.instagram) && (
-              <div className="pt-4 border-t">
-                <h3 className="font-semibold text-sm mb-3 text-primary">Informasi Kontak</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {travel.address && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Alamat</p>
-                        <p className="text-sm font-medium">{travel.address}</p>
-                      </div>
-                    </div>
-                  )}
-                  {travel.phone && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Phone className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Telepon</p>
-                        <a href={`tel:${travel.phone}`} className="text-sm font-medium hover:text-primary">
-                          {travel.phone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {travel.email && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Mail className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                        <a href={`mailto:${travel.email}`} className="text-sm font-medium hover:text-primary break-all">
-                          {travel.email}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {travel.website && (
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <Globe className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Website</p>
-                        <a 
-                          href={travel.website.startsWith('http') ? travel.website : `https://${travel.website}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-sm font-medium hover:text-primary break-all"
-                        >
-                          {travel.website}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  {travel.instagram && (
-                    <div className="flex items-start gap-3 p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
-                      <svg className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Instagram</p>
-                        <a 
-                          href={travel.instagram.startsWith('http') ? travel.instagram : `https://instagram.com/${travel.instagram.replace('@', '')}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-sm font-medium text-pink-600 hover:text-pink-700 break-all"
-                        >
-                          {travel.instagram.startsWith('@') ? travel.instagram : `@${travel.instagram}`}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
           </Card>
 
           {/* Tabs */}
@@ -657,50 +585,71 @@ ${window.location.href}
           </Tabs>
 
           {/* Contact Info Card */}
-          <Card className="p-4 md:p-6">
-            <h3 className="font-bold text-lg mb-4 text-primary">Informasi Kontak</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-5 h-5 text-primary" />
+          <Card className="p-6">
+            <h3 className="text-lg font-bold text-green-600 mb-6">Informasi Kontak</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Alamat</p>
+                    <p className="text-sm text-gray-800 font-medium">{travel.address}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Alamat</p>
-                  <p className="text-sm font-medium">{travel.address}</p>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Email</p>
+                    <p className="text-sm text-gray-800 font-medium break-all">{travel.email}</p>
+                  </div>
                 </div>
+                {travel.instagram && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Instagram className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Instagram</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.instagram}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-5 h-5 text-primary" />
+
+              {/* Right Column */}
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Telepon</p>
+                    <p className="text-sm text-gray-800 font-medium">{travel.phone}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Telepon</p>
-                  <p className="text-sm font-medium">
-                    {travel.phone}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Email</p>
-                  <p className="text-sm font-medium break-all">
-                    {travel.email}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Globe className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground mb-1">Website</p>
-                  <p className="text-sm font-medium break-all">
-                    {travel.website}
-                  </p>
-                </div>
+                {travel.website && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Globe className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Website</p>
+                      <a 
+                        href={travel.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-gray-800 font-medium hover:text-green-600 transition-colors break-all"
+                      >
+                        {travel.website}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
