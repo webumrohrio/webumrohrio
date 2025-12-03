@@ -590,46 +590,54 @@ ${window.location.href}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-green-600" />
+                {travel.address && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Alamat</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.address}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Alamat</p>
-                    <p className="text-sm text-gray-800 font-medium">{travel.address}</p>
+                )}
+                {travel.email && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Email</p>
+                      <p className="text-sm text-gray-800 font-medium break-all">{travel.email}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 text-green-600" />
+                )}
+                {travel.instagram && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Instagram className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Instagram</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.instagram}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Email</p>
-                    <p className="text-sm text-gray-800 font-medium break-all">{travel.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Instagram className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Instagram</p>
-                    <p className="text-sm text-gray-800 font-medium">{travel.instagram || '-'}</p>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Right Column */}
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-5 h-5 text-green-600" />
+                {travel.phone && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Telepon</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.phone}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Telepon</p>
-                    <p className="text-sm text-gray-800 font-medium">{travel.phone}</p>
-                  </div>
-                </div>
+                )}
                 {travel.website && (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
