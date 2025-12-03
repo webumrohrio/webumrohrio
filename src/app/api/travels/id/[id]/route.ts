@@ -57,6 +57,7 @@ export async function PUT(
       phone: body.phone,
       email: body.email,
       website: body.website,
+      instagram: body.instagram,
       rating: body.rating || 0,
       totalReviews: body.totalReviews || 0,
       totalJamaah: body.totalJamaah || 0,
