@@ -7,8 +7,8 @@ import { usePathname } from 'next/navigation'
 
 const menuItems = [
   { icon: Home, label: 'Home', href: '/' },
-  { icon: PlaneTakeoff, label: 'Paket', href: '/paket-umroh' },
-  { icon: Users, label: 'Travel', href: '/travel-umroh' },
+  { icon: PlaneTakeoff, label: 'Paket Umroh', href: '/paket-umroh' },
+  { icon: Users, label: 'Travel Umroh', href: '/travel-umroh' },
   { icon: FileText, label: 'Artikel', href: '/artikel' },
   { icon: User, label: 'Profile', href: '/profile' },
 ]
