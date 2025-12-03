@@ -27,6 +27,7 @@ export default function CreateTravelPage() {
     email: '',
     password: '',
     website: '',
+    instagram: '',
     rating: 4.5,
     totalReviews: 0,
     totalJamaah: 0,
@@ -596,6 +597,14 @@ export default function CreateTravelPage() {
                 value={formData.website}
                 onChange={(e) => setFormData({...formData, website: e.target.value})}
                 placeholder="https://safira.com"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Instagram</label>
+              <Input
+                value={formData.instagram}
+                onChange={(e) => setFormData({...formData, instagram: e.target.value})}
+                placeholder="@safiratravel atau https://instagram.com/safiratravel"
               />
             </div>
             <div className="md:col-span-2">

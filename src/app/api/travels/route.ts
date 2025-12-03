@@ -285,6 +285,7 @@ export async function POST(request: Request) {
       email: body.email,
       password: hashedPassword,
       website: body.website,
+      instagram: body.instagram,
       rating: body.rating || 0,
       totalReviews: body.totalReviews || 0,
       totalJamaah: body.totalJamaah || 0,

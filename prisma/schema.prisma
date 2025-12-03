@@ -58,6 +58,7 @@ model Travel {
   city             String?
   phone            String?
   website          String?
+  instagram        String?
   rating           Float    @default(0)
   totalReviews     Int      @default(0)
   totalJamaah      Int      @default(0)
