@@ -1,6 +1,7 @@
 'use client'
 
 import { MobileLayout } from '@/components/mobile-layout'
+import { TravelProfileSEO } from '@/components/travel-profile-seo'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -271,6 +272,7 @@ ${window.location.href}
 
   return (
     <MobileLayout hideBottomNav>
+      <TravelProfileSEO travel={travel} />
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-40">
