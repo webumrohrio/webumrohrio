@@ -590,14 +590,14 @@ ${window.location.href}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-4">
-                {travel.address && (
+                {travel.phone && (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-green-600" />
+                      <Phone className="w-5 h-5 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Alamat</p>
-                      <p className="text-sm text-gray-800 font-medium">{travel.address}</p>
+                      <p className="text-xs text-gray-500 mb-1">Telepon</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.phone}</p>
                     </div>
                   </div>
                 )}
@@ -627,17 +627,6 @@ ${window.location.href}
 
               {/* Right Column */}
               <div className="space-y-4">
-                {travel.phone && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Telepon</p>
-                      <p className="text-sm text-gray-800 font-medium">{travel.phone}</p>
-                    </div>
-                  </div>
-                )}
                 {travel.website && (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -645,14 +634,20 @@ ${window.location.href}
                     </div>
                     <div className="flex-1">
                       <p className="text-xs text-gray-500 mb-1">Website</p>
-                      <a 
-                        href={travel.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm text-gray-800 font-medium hover:text-green-600 transition-colors break-all"
-                      >
+                      <p className="text-sm text-gray-800 font-medium break-all">
                         {travel.website}
-                      </a>
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {travel.address && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Alamat</p>
+                      <p className="text-sm text-gray-800 font-medium">{travel.address}</p>
                     </div>
                   </div>
                 )}
