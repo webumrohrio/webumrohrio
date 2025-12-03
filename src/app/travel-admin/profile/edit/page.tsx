@@ -28,6 +28,7 @@ export default function EditTravelProfilePage() {
     phone: '',
     email: '',
     website: '',
+    instagram: '',
     rating: 4.5,
     totalReviews: 0,
     totalJamaah: 0,
@@ -105,6 +106,7 @@ export default function EditTravelProfilePage() {
           phone: travel.phone || '',
           email: travel.email || '',
           website: travel.website || '',
+          instagram: travel.instagram || '',
           rating: travel.rating || 4.5,
           totalReviews: travel.totalReviews || 0,
           totalJamaah: travel.totalJamaah || 0,
@@ -721,6 +723,14 @@ export default function EditTravelProfilePage() {
                   value={formData.website}
                   onChange={(e) => setFormData({...formData, website: e.target.value})}
                   placeholder="https://www.example.com"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Instagram</label>
+                <Input
+                  value={formData.instagram}
+                  onChange={(e) => setFormData({...formData, instagram: e.target.value})}
+                  placeholder="@namatravel atau https://instagram.com/namatravel"
                 />
               </div>
             </div>
