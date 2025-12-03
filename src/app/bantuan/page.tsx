@@ -3,7 +3,7 @@
 import { MobileLayout } from '@/components/mobile-layout'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { ArrowLeft, Mail, HelpCircle, ChevronRight, MapPin, Phone } from 'lucide-react'
+import { ArrowLeft, Mail, HelpCircle, ChevronRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
@@ -101,51 +101,16 @@ export default function BantuanPage() {
         </header>
 
         <div className="container mx-auto max-w-7xl px-4 py-6">
-          {/* Contact Info Card */}
-          <Card className="p-6">
-            <h3 className="text-lg font-bold text-green-600 mb-6">Informasi Kontak</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column */}
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Alamat</p>
-                    <p className="text-sm text-gray-800 font-medium">
-                      Jl. Raya Condet No. 27, Batu Ampar, Kramat Jati, Jakarta Timur, DKI Jakarta 13520
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Email</p>
-                    <p className="text-sm text-gray-800 font-medium">ertourofficial@gmail.com</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">Telepon</p>
-                    <p className="text-sm text-gray-800 font-medium">{adminPhone || 'Memuat...'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Info Card */}
+          <Card className="p-6 mb-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+            <h2 className="text-lg font-bold mb-2">Butuh Bantuan?</h2>
+            <p className="text-sm text-muted-foreground">
+              Hubungi kontak di bawah untuk mendapatkan bantuan
+            </p>
           </Card>
 
           {/* Help Options Card */}
-          <Card className="divide-y mt-6">
+          <Card className="divide-y">
             {helpItems.map((item, index) => (
               <div
                 key={index}
