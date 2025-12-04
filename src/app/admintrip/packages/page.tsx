@@ -309,7 +309,7 @@ export default function PackagesPage() {
           <p className="text-2xl font-bold text-red-600">{analytics.totalFavorites.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-sm text-gray-600">Klik Booking</p>
+          <p className="text-sm text-gray-600">Paket di Pilih</p>
           <p className="text-2xl font-bold text-orange-600">{analytics.totalBookingClicks.toLocaleString()}</p>
         </Card>
         <Card className="p-4">
