@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
-  ArrowLeft, Edit, ExternalLink, MapPin, Phone, Mail, Globe, PlaneTakeoff
+  ArrowLeft, Edit, ExternalLink, MapPin, Phone, Mail, Globe, PlaneTakeoff, Instagram
 } from 'lucide-react'
 import Image from 'next/image'
 
@@ -22,6 +22,7 @@ interface TravelProfile {
   address: string | null
   phone: string | null
   website: string | null
+  instagram: string | null
   rating: number
   totalReviews: number
   totalJamaah: number
@@ -290,20 +291,20 @@ export default function TravelProfilePage() {
         </Card>
 
         {/* Contact Info */}
-        {(profile.address || profile.phone || profile.email || profile.website) && (
+        {(profile.phone || profile.email || profile.instagram || profile.website || profile.address) && (
           <Card className="p-6">
             <h3 className="text-lg font-bold text-green-600 mb-6">Informasi Kontak</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-4">
-                {profile.address && (
+                {profile.phone && (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-green-600" />
+                      <Phone className="w-5 h-5 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Alamat</p>
-                      <p className="text-sm text-gray-800 font-medium">{profile.address}</p>
+                      <p className="text-xs text-gray-500 mb-1">Telepon</p>
+                      <p className="text-sm text-gray-800 font-medium">{profile.phone}</p>
                     </div>
                   </div>
                 )}
@@ -318,21 +319,28 @@ export default function TravelProfilePage() {
                     </div>
                   </div>
                 )}
+                {profile.instagram && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <Instagram className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Instagram</p>
+                      <a 
+                        href={profile.instagram.startsWith('http') ? profile.instagram : `https://instagram.com/${profile.instagram.replace('@', '')}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm text-gray-800 font-medium hover:text-green-600 transition-colors"
+                      >
+                        {profile.instagram}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column */}
               <div className="space-y-4">
-                {profile.phone && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">Telepon</p>
-                      <p className="text-sm text-gray-800 font-medium">{profile.phone}</p>
-                    </div>
-                  </div>
-                )}
                 {profile.website && (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
@@ -348,6 +356,17 @@ export default function TravelProfilePage() {
                       >
                         {profile.website}
                       </a>
+                    </div>
+                  </div>
+                )}
+                {profile.address && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">Alamat</p>
+                      <p className="text-sm text-gray-800 font-medium">{profile.address}</p>
                     </div>
                   </div>
                 )}
