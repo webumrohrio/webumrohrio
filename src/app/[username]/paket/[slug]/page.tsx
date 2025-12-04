@@ -634,7 +634,7 @@ Terima kasih.`
                   </svg>
                 </div>
                 
-                <h3 className="text-xl font-bold text-center mb-2">Booking Paket Umroh</h3>
+                <h3 className="text-xl font-bold text-center mb-2">Pilih Paket Umroh</h3>
                 
                 {isLoggedIn && (
                   <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
@@ -731,11 +731,7 @@ Terima kasih.`
                 </Button>
               </div>
 
-              {!isLoggedIn && (
-                <p className="text-xs text-center text-muted-foreground mt-4">
-                  Data Anda akan disimpan untuk mempermudah booking selanjutnya
-                </p>
-              )}
+
             </div>
           </div>
           )
