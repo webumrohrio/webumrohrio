@@ -59,8 +59,14 @@ export function CelebrationPopup({
         })
       }, 250)
 
+      // Auto close after 5 seconds
+      const autoCloseTimeout = setTimeout(() => {
+        onClose()
+      }, 5000)
+
       return () => {
         clearInterval(interval)
+        clearTimeout(autoCloseTimeout)
       }
     }
   }, [isOpen, onClose])

@@ -55,7 +55,8 @@ export default function TravelAdminDashboard() {
     celebration,
     closeCelebration,
     checkPackageMilestones,
-    checkTotalMilestones
+    checkTotalMilestones,
+    isEnabled
   } = useCelebration()
 
   useEffect(() => {
@@ -166,7 +167,7 @@ export default function TravelAdminDashboard() {
   return (
     <>
       {/* Celebration Popup */}
-      {celebration && (
+      {celebration && isEnabled && (
         <CelebrationPopup
           isOpen={true}
           onClose={closeCelebration}
