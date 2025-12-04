@@ -234,7 +234,7 @@ const PackageCardComponent = ({
               <span className="line-clamp-1 font-medium">{departureCity}</span>
             </div>
             <div className="text-right flex-shrink-0">
-              {originalPrice && originalPrice > price && (
+              {originalPrice !== undefined && originalPrice !== null && originalPrice > 0 && originalPrice > price && (
                 <p className="text-[11px] md:text-[12px] text-muted-foreground line-through leading-tight">
                   {formatCurrency(originalPrice)}
                 </p>
