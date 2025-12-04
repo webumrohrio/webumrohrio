@@ -334,26 +334,40 @@ export default function Home() {
   const fetchLogo = async () => {
     try {
       const response = await fetch('/api/settings?key=siteLogo')
+      
+      if (!response.ok) {
+        console.warn('Failed to fetch logo, using default')
+        return
+      }
+      
       const result = await response.json()
       
       if (result.success && result.data && result.data.value) {
         setLogoUrl(result.data.value)
       }
     } catch (error) {
-      console.error('Error fetching logo:', error)
+      // Silently fail - logo is not critical for app functionality
+      console.warn('Error fetching logo, using default:', error)
     }
   }
 
   const fetchTagline = async () => {
     try {
       const response = await fetch('/api/settings?key=siteTagline')
+      
+      if (!response.ok) {
+        console.warn('Failed to fetch tagline, using default')
+        return
+      }
+      
       const result = await response.json()
       
       if (result.success && result.data && result.data.value) {
         setSiteTagline(result.data.value)
       }
     } catch (error) {
-      console.error('Error fetching tagline:', error)
+      // Silently fail - tagline is not critical for app functionality
+      console.warn('Error fetching tagline, using default:', error)
     }
   }
 
@@ -365,21 +379,30 @@ export default function Home() {
         fetch('/api/settings?key=showPromo')
       ])
 
-      const countData = await countRes.json()
-      const analyticsData = await analyticsRes.json()
-      const promoData = await promoRes.json()
-
-      if (countData.success && countData.data) {
-        setPackageCount(parseInt(countData.data.value))
+      // Check if responses are ok before parsing
+      if (countRes.ok) {
+        const countData = await countRes.json()
+        if (countData.success && countData.data) {
+          setPackageCount(parseInt(countData.data.value))
+        }
       }
-      if (analyticsData.success && analyticsData.data) {
-        setShowAnalytics(analyticsData.data.value === 'true')
+      
+      if (analyticsRes.ok) {
+        const analyticsData = await analyticsRes.json()
+        if (analyticsData.success && analyticsData.data) {
+          setShowAnalytics(analyticsData.data.value === 'true')
+        }
       }
-      if (promoData.success && promoData.data) {
-        setShowPromo(promoData.data.value === 'true')
+      
+      if (promoRes.ok) {
+        const promoData = await promoRes.json()
+        if (promoData.success && promoData.data) {
+          setShowPromo(promoData.data.value === 'true')
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch homepage settings:', error)
+      // Silently fail - use default settings
+      console.warn('Failed to fetch homepage settings, using defaults:', error)
     } finally {
       setSettingsLoaded(true)
     }
