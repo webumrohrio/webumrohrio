@@ -111,7 +111,7 @@ export default function BookingsPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="bg-primary/10 px-4 py-2 rounded-lg">
-            <p className="text-sm text-gray-600">Total Booking</p>
+            <p className="text-sm text-gray-600">Total Paket di Pilih</p>
             <p className="text-2xl font-bold text-primary">{totalCount}</p>
           </div>
         </div>
