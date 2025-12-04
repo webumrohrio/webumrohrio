@@ -153,7 +153,7 @@ export function LocationSelector({ onLocationSelect, currentLocation, hideBadge 
 
           <div className="space-y-4 py-4">
             <Select value={selectedLocation} onValueChange={handleLocationChange} disabled={loading}>
-              <SelectTrigger className="w-full h-14 border-2 border-primary/30 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 bg-primary/5 text-base font-medium transition-all duration-200 animate-[pulse_4s_ease-in-out_infinite]">
+              <SelectTrigger className="w-full h-14 border-2 border-primary/30 hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 bg-primary/5 text-base font-medium transition-all duration-200 animate-[pulse_6s_ease-in-out_infinite]">
                 <SelectValue placeholder={loading ? "Memuat kota..." : "Pilih kota..."} />
               </SelectTrigger>
               <SelectContent>
