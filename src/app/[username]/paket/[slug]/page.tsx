@@ -1135,7 +1135,7 @@ Terima kasih.`
                   <div className="mb-3">
                     <h4 className="font-bold text-base md:text-lg mb-2">{option.name}</h4>
                     <div>
-                      {option.originalPrice && option.originalPrice > option.price && (
+                      {option.originalPrice != null && option.originalPrice > 0 && option.originalPrice > option.price && (
                         <p className="text-sm text-muted-foreground line-through">
                           {formatCurrency(option.originalPrice)}
                         </p>
