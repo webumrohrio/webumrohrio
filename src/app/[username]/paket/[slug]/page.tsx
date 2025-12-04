@@ -863,7 +863,7 @@ Terima kasih.`
               <ArrowLeft className="w-5 h-5 text-muted-foreground rotate-180" />
             </div>
 
-            <p className="text-sm md:text-base text-muted-foreground mb-4">
+            <p className="text-sm md:text-base text-muted-foreground mb-4 whitespace-pre-line">
               {packageDetail.description}
             </p>
 
