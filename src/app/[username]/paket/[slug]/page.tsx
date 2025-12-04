@@ -1100,7 +1100,9 @@ Terima kasih.`
           <Card className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold">Pilih Paket</h3>
-              <p className="text-xs text-muted-foreground">Geser untuk melihat paket lainnya →</p>
+              {packageDetail.priceOptions.length > 1 && (
+                <p className="text-xs text-muted-foreground">Geser untuk melihat paket lainnya →</p>
+              )}
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 pt-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
               {packageDetail.priceOptions.map((option, index) => (
