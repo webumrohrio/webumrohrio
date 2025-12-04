@@ -75,10 +75,13 @@ export function LocationSelector({ onLocationSelect, currentLocation, hideBadge 
     }
   }
 
-  const handleSave = () => {
-    if (selectedLocation && typeof window !== 'undefined') {
-      localStorage.setItem('preferredLocation', selectedLocation)
-      onLocationSelect(selectedLocation)
+  const handleLocationChange = (location: string) => {
+    setSelectedLocation(location)
+    
+    // Auto-save and close when location is selected
+    if (location && typeof window !== 'undefined') {
+      localStorage.setItem('preferredLocation', location)
+      onLocationSelect(location)
       setIsOpen(false)
     }
   }
@@ -149,7 +152,7 @@ export function LocationSelector({ onLocationSelect, currentLocation, hideBadge 
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <Select value={selectedLocation} onValueChange={setSelectedLocation} disabled={loading}>
+            <Select value={selectedLocation} onValueChange={handleLocationChange} disabled={loading}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={loading ? "Memuat kota..." : "Pilih kota..."} />
               </SelectTrigger>
@@ -167,14 +170,6 @@ export function LocationSelector({ onLocationSelect, currentLocation, hideBadge 
                 )}
               </SelectContent>
             </Select>
-
-            <Button
-              onClick={handleSave}
-              disabled={!selectedLocation}
-              className="w-full"
-            >
-              Simpan Lokasi
-            </Button>
 
             <p className="text-xs text-center text-muted-foreground">
               Anda dapat mengubah lokasi kapan saja
