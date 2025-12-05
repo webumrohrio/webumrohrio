@@ -234,7 +234,9 @@ export default function Home() {
     try {
       const locationParam = location && location !== 'all' ? `&location=${location}` : ''
       // Desktop always shows 8, mobile/tablet uses admin setting
-      const limit = getDisplayCount()
+      const targetCount = getDisplayCount()
+      // Fetch extra to account for potential non-verified packages being filtered
+      const limit = targetCount + 5
       const response = await fetch(`/api/packages?limit=${limit}${locationParam}`)
       
       if (!response.ok) {
@@ -253,6 +255,7 @@ export default function Home() {
       if (result.success && result.data) {
         const formattedPackages = result.data
           .filter((pkg: any) => pkg.travel.isVerified) // Only show verified travel packages
+          .slice(0, targetCount) // Limit to target count after filtering
           .map((pkg: any) => ({
             id: pkg.id,
             slug: pkg.slug,
