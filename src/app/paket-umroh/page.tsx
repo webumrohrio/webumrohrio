@@ -279,7 +279,7 @@ export default function PaketUmroh() {
           loadMore()
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.5, rootMargin: '200px' } // Increased threshold and added rootMargin
     )
 
     const currentTarget = observerTarget.current
@@ -293,6 +293,25 @@ export default function PaketUmroh() {
       }
     }
   }, [hasMore, loadingMore, loading, loadMore])
+  
+  // Fallback: Scroll listener for infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore || loading) return
+      
+      const scrollTop = window.scrollY || document.documentElement.scrollTop
+      const scrollHeight = document.documentElement.scrollHeight
+      const clientHeight = window.innerHeight
+      
+      // Trigger when user is 300px from bottom
+      if (scrollTop + clientHeight >= scrollHeight - 300) {
+        loadMore()
+      }
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [loadingMore, hasMore, loading, loadMore])
   
   // Handle search button click or Enter key
   const handleSearch = () => {
