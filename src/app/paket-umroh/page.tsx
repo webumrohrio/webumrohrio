@@ -63,6 +63,7 @@ export default function PaketUmroh() {
   const isFetching = useRef(false) // Guard against concurrent fetches
   const lastSortKey = useRef<string>('') // Track last sort/location combination
   const abortControllerRef = useRef<AbortController | null>(null) // For cancelling pending fetches
+  const fetchGeneration = useRef(0) // Track fetch generation to ignore stale updates
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
@@ -164,6 +165,10 @@ export default function PaketUmroh() {
     
     console.log('🔄 sortBy/location changed, resetting state:', currentKey)
     
+    // Increment generation to invalidate pending fetches
+    fetchGeneration.current++
+    console.log('📈 New fetch generation:', fetchGeneration.current)
+    
     // Reset all state synchronously
     setPackages([])
     setPage(1)
@@ -186,6 +191,10 @@ export default function PaketUmroh() {
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
+    // Capture current generation
+    const currentGeneration = fetchGeneration.current
+    console.log('🎯 Starting fetch for generation:', currentGeneration, 'page:', pageNum)
+    
     // Cancel any pending fetch
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -248,6 +257,12 @@ export default function PaketUmroh() {
       // Check if this fetch was cancelled
       if (abortController.signal.aborted) {
         console.log('⏭️ Fetch was cancelled, skipping state update')
+        return
+      }
+      
+      // Check if this fetch is stale (generation changed)
+      if (currentGeneration !== fetchGeneration.current) {
+        console.log('⏭️ Fetch is stale (gen', currentGeneration, 'vs current', fetchGeneration.current, '), skipping state update')
         return
       }
       
