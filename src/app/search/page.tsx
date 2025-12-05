@@ -171,13 +171,10 @@ function SearchContent() {
     return score
   }
 
+  // No need for client-side filtering since API already filters with search parameter
+  // Just sort by relevance and limit results
   const filteredPackages = searchQuery.trim() 
     ? packages
-        .filter(pkg => 
-          pkg.packageName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          pkg.travelName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          pkg.departureCity?.toLowerCase().includes(searchQuery.toLowerCase())
-        )
         .map(pkg => ({
           ...pkg,
           relevanceScore: calculatePackageRelevance(pkg, searchQuery)
