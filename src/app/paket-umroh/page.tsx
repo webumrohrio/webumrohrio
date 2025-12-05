@@ -295,8 +295,14 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          console.log('📊 Appending:', formattedPackages.length, 'packages to existing:', packages.length)
-          setPackages(prev => [...prev, ...formattedPackages])
+          setPackages(prev => {
+            // Simple dedup: create map of existing IDs
+            const existingIds = new Set(prev.map(p => p.id))
+            // Only add packages that don't exist
+            const uniqueNew = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
+            console.log('📊 Appending:', uniqueNew.length, 'unique packages (filtered', formattedPackages.length - uniqueNew.length, 'duplicates)')
+            return [...prev, ...uniqueNew]
+          })
         } else {
           console.log('🔄 Replacing with:', formattedPackages.length, 'packages')
           setPackages(formattedPackages)
