@@ -753,7 +753,7 @@ Terima kasih.`
         {/* Header with Back Button */}
         <header className="bg-white shadow-sm sticky top-0 z-40">
           <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => router.back()}>
+            <Button variant="ghost" size="sm" onClick={() => router.push('/paket-umroh')}>
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-lg font-bold text-primary">Detail Paket</h1>
