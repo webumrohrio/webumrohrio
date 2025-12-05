@@ -235,13 +235,19 @@ export default function PaketUmroh() {
           setTotalCount(result.pagination.total)
         }
         
-        // Check if there are more packages to load
-        const hasMoreData = result.data.length === 20
+        // Check if there are more packages to load using API pagination info
+        const hasMoreData = result.pagination?.hasNextPage ?? (result.data.length === 20)
         setHasMore(hasMoreData)
         
         // Append or replace packages
         if (append) {
-          setPackages(prev => [...prev, ...formattedPackages])
+          setPackages(prev => {
+            // Create a Set of existing IDs for fast lookup
+            const existingIds = new Set(prev.map(p => p.id))
+            // Filter out packages that already exist
+            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
+            return [...prev, ...newPackages]
+          })
         } else {
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
