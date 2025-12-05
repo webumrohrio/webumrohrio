@@ -149,7 +149,7 @@ export default function PaketUmroh() {
     }
   }, [sortBy, preferredLocation])
 
-  const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false) => {
+  const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
     if (append) {
       setLoadingMore(true)
     } else {
@@ -161,10 +161,13 @@ export default function PaketUmroh() {
     try {
       // Use location parameter or preferredLocation state
       const loc = location || preferredLocation
+      // Use searchQuery parameter if provided, otherwise use activeSearch state
+      const searchToUse = searchQuery !== undefined ? searchQuery : activeSearch
+      
       const locationParam = loc && loc !== 'all' ? `location=${loc}` : ''
       const pageParam = `page=${pageNum}`
-      const pageSizeParam = activeSearch ? 'pageSize=50' : 'pageSize=20' // More results when searching
-      const searchParam = activeSearch ? `search=${encodeURIComponent(activeSearch)}` : ''
+      const pageSizeParam = searchToUse ? 'pageSize=50' : 'pageSize=20' // More results when searching
+      const searchParam = searchToUse ? `search=${encodeURIComponent(searchToUse)}` : ''
       
       // Combine params
       const params = [locationParam, pageParam, pageSizeParam, searchParam].filter(Boolean).join('&')
@@ -284,12 +287,14 @@ export default function PaketUmroh() {
   // Handle search button click or Enter key
   const handleSearch = () => {
     if (search.trim()) {
-      setActiveSearch(search.trim())
-      fetchPackages(preferredLocation, 1, false)
+      const trimmedSearch = search.trim()
+      setActiveSearch(trimmedSearch)
+      // Pass search query directly to avoid race condition
+      fetchPackages(preferredLocation, 1, false, trimmedSearch)
     } else if (activeSearch) {
       // Clear search if input is empty
       setActiveSearch('')
-      fetchPackages(preferredLocation, 1, false)
+      fetchPackages(preferredLocation, 1, false, '')
     }
   }
 
@@ -416,7 +421,8 @@ export default function PaketUmroh() {
                       onClick={() => {
                         setSearch('')
                         setActiveSearch('')
-                        fetchPackages(preferredLocation, 1, false)
+                        // Pass empty string to clear search
+                        fetchPackages(preferredLocation, 1, false, '')
                       }}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       aria-label="Hapus pencarian"
