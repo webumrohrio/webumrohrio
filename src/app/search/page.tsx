@@ -5,7 +5,7 @@ import { PackageCard } from '@/components/package-card'
 import { TravelCard } from '@/components/travel-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowLeft, Search } from 'lucide-react'
+import { ArrowLeft, Search, X } from 'lucide-react'
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -226,9 +226,23 @@ function SearchContent() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   autoFocus
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('')
+                      setHasSearched(false)
+                      setPackages([])
+                      setTravels([])
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Hapus pencarian"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
               <Button 
                 onClick={handleSearch}
