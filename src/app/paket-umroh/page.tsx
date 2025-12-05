@@ -161,7 +161,6 @@ export default function PaketUmroh() {
       return
     }
     
-    lastSortKey.current = currentKey
     console.log('🔄 sortBy/location changed, resetting state:', currentKey)
     
     // Reset all state synchronously
@@ -170,6 +169,9 @@ export default function PaketUmroh() {
     setHasMore(true)
     setLoading(true)
     isFetching.current = false // Reset fetch guard
+    
+    // Update lastSortKey AFTER state is reset
+    lastSortKey.current = currentKey
     
     // Use timeout to debounce rapid changes
     const timeoutId = setTimeout(() => {
@@ -275,35 +277,8 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          setPackages(prev => {
-            console.log('📊 Before append:', {
-              existingCount: prev.length,
-              existingIds: prev.map(p => p.id).slice(0, 5),
-              newCount: formattedPackages.length,
-              newIds: formattedPackages.map((p: Package) => p.id).slice(0, 5)
-            })
-            
-            const existingIds = new Set(prev.map(p => p.id))
-            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
-            
-            // Debug logging
-            if (formattedPackages.length !== newPackages.length) {
-              const duplicates = formattedPackages.filter((p: Package) => existingIds.has(p.id))
-              console.warn('⚠️ Filtered duplicates:', {
-                received: formattedPackages.length,
-                afterDedup: newPackages.length,
-                duplicateIds: duplicates.map((p: Package) => p.id),
-                duplicateNames: duplicates.map((p: Package) => p.packageName)
-              })
-            }
-            
-            console.log('✅ After append:', {
-              totalCount: prev.length + newPackages.length,
-              addedCount: newPackages.length
-            })
-            
-            return [...prev, ...newPackages]
-          })
+          console.log('📊 Appending:', formattedPackages.length, 'packages to existing:', packages.length)
+          setPackages(prev => [...prev, ...formattedPackages])
         } else {
           console.log('🔄 Replacing with:', formattedPackages.length, 'packages')
           setPackages(formattedPackages)
