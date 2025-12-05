@@ -251,28 +251,30 @@ export default function Home() {
       const result = JSON.parse(text)
       
       if (result.success && result.data) {
-        const formattedPackages = result.data.map((pkg: any) => ({
-          id: pkg.id,
-          slug: pkg.slug,
-          travelUsername: pkg.travel.username,
-          image: pkg.image,
-          packageName: pkg.name,
-          travelName: pkg.travel.name,
-          travelLogo: pkg.travel.logo || null,
-          travelVerified: pkg.travel.isVerified || false,
-          departureDate: new Date(pkg.departureDate).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-          }),
-          departureDateRaw: pkg.departureDate,
-          duration: pkg.duration,
-          departureCity: pkg.departureCity,
-          price: pkg.price,
-          originalPrice: pkg.originalPrice,
-          quota: pkg.quotaAvailable,
-          cashback: pkg.cashback
-        }))
+        const formattedPackages = result.data
+          .filter((pkg: any) => pkg.travel.isVerified) // Only show verified travel packages
+          .map((pkg: any) => ({
+            id: pkg.id,
+            slug: pkg.slug,
+            travelUsername: pkg.travel.username,
+            image: pkg.image,
+            packageName: pkg.name,
+            travelName: pkg.travel.name,
+            travelLogo: pkg.travel.logo || null,
+            travelVerified: pkg.travel.isVerified || false,
+            departureDate: new Date(pkg.departureDate).toLocaleDateString('id-ID', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            }),
+            departureDateRaw: pkg.departureDate,
+            duration: pkg.duration,
+            departureCity: pkg.departureCity,
+            price: pkg.price,
+            originalPrice: pkg.originalPrice,
+            quota: pkg.quotaAvailable,
+            cashback: pkg.cashback
+          }))
         setPackages(formattedPackages)
       }
     } catch (error) {
