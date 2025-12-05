@@ -359,7 +359,11 @@ export default function PaketUmroh() {
                 {/* Show Cari button only when search field is focused and has text */}
                 {isSearchFocused && search.trim() && (
                   <Button
-                    onClick={handleSearch}
+                    onMouseDown={(e) => {
+                      // Prevent blur event on input when clicking button
+                      e.preventDefault()
+                      handleSearch()
+                    }}
                     disabled={loading}
                     className="h-10 md:h-12 min-w-[70px] md:min-w-[80px]"
                   >
