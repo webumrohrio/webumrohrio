@@ -46,6 +46,7 @@ export default function PaketUmroh() {
   const [sortBy, setSortBy] = useState('default')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [preferredLocation, setPreferredLocation] = useState<string>('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false) // Track if search input is focused
   
   // Advanced filters
   const [departureMonth, setDepartureMonth] = useState('all')
@@ -335,6 +336,8 @@ export default function PaketUmroh() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
                     className="pl-10 md:pl-12 pr-10 h-10 md:h-12"
                   />
                   {search && (
@@ -353,8 +356,8 @@ export default function PaketUmroh() {
                   )}
                 </div>
 
-                {/* Show Cari button only when user is typing */}
-                {search.trim() && (
+                {/* Show Cari button only when search field is focused and has text */}
+                {isSearchFocused && search.trim() && (
                   <Button
                     onClick={handleSearch}
                     disabled={loading}
@@ -368,8 +371,8 @@ export default function PaketUmroh() {
                   </Button>
                 )}
 
-                {/* Show Filter button only when not typing */}
-                {!search.trim() && (
+                {/* Show Filter button when search is not focused or empty */}
+                {(!isSearchFocused || !search.trim()) && (
                   <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                   <SheetTrigger asChild>
                     <Button 
