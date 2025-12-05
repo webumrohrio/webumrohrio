@@ -152,7 +152,6 @@ export default function PaketUmroh() {
     
     // Reset to page 1 when sort or location changes
     // Pass activeSearch to maintain search query
-    console.log('🔄 sortBy or location changed, fetching...', { sortBy, preferredLocation })
     fetchPackages(preferredLocation, 1, false, activeSearch)
   }, [sortBy, preferredLocation])
 
@@ -197,13 +196,8 @@ export default function PaketUmroh() {
       const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam, sortParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
-      console.log('🔍 Fetching packages:', { url, sortBy, pageNum, append })
-      
       const response = await fetch(url)
       const result = await response.json()
-      
-      console.log('📦 Received packages:', result.data?.length, 'Total:', result.pagination?.total)
-      console.log('📋 Package IDs:', result.data?.map((p: any) => `${p.id}:${p.name.substring(0, 20)}`).join(', '))
       
       if (result.success) {
         let formattedPackages = result.data.map((pkg: any) => ({
@@ -247,10 +241,8 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          console.log('📝 Appending packages:', formattedPackages.length, 'to existing:', packages.length)
           setPackages(prev => [...prev, ...formattedPackages])
         } else {
-          console.log('🔄 Replacing packages with:', formattedPackages.length, 'new packages')
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
         }
@@ -265,17 +257,13 @@ export default function PaketUmroh() {
   
   // Load more packages
   const loadMore = useCallback(() => {
-    console.log('🔄 loadMore called:', { loadingMore, hasMore, page, packagesCount: packages.length })
     if (!loadingMore && hasMore) {
       const nextPage = page + 1
-      console.log('✅ Loading page:', nextPage)
       setPage(nextPage)
       // Pass activeSearch to maintain search query and sorting
       fetchPackages(preferredLocation, nextPage, true, activeSearch)
-    } else {
-      console.log('❌ loadMore blocked:', { loadingMore, hasMore, page })
     }
-  }, [loadingMore, hasMore, page, preferredLocation, activeSearch, packages.length])
+  }, [loadingMore, hasMore, page, preferredLocation, activeSearch])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
