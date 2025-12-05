@@ -132,6 +132,9 @@ export default function PackagesPage() {
       const response = await fetch('/api/packages?includeInactive=true')
       const result = await response.json()
       
+      console.log('📦 Total packages from API:', result.data?.length)
+      console.log('📦 DNT packages:', result.data?.filter((p: any) => p.travel.username === 'dnt').length)
+      
       if (result.success) {
         // Auto-deactivate packages with past departure dates
         const now = new Date()
