@@ -42,16 +42,19 @@ function SearchContent() {
   
   const [packages, setPackages] = useState<Package[]>([])
   const [travels, setTravels] = useState<Travel[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState(queryParam)
+  const [hasSearched, setHasSearched] = useState(false)
 
   useEffect(() => {
-    // Fetch initial data or search results based on query param
+    // Only set search query from URL, don't auto-fetch
     if (queryParam) {
       setSearchQuery(queryParam)
-      fetchData(queryParam)
-    } else {
-      fetchData()
+      // Auto-fetch only if coming from URL with query (e.g., from external link)
+      if (queryParam && !hasSearched) {
+        fetchData(queryParam)
+        setHasSearched(true)
+      }
     }
   }, [queryParam])
 
@@ -110,8 +113,10 @@ function SearchContent() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      // Just update URL, useEffect will handle fetching
+      setHasSearched(true)
+      // Update URL and fetch data
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+      fetchData(searchQuery)
     }
   }
 
@@ -226,10 +231,15 @@ function SearchContent() {
                 />
               </div>
               <Button 
-                variant="outline" 
-                onClick={() => setSearchQuery('')}
+                onClick={handleSearch}
+                disabled={!searchQuery.trim() || loading}
+                className="min-w-[80px]"
               >
-                Batal
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  'Cari'
+                )}
               </Button>
             </div>
           </div>
@@ -239,9 +249,12 @@ function SearchContent() {
         <main className="container mx-auto max-w-7xl px-4 py-6">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Memuat...</p>
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-muted-foreground">Mencari...</p>
+              </div>
             </div>
-          ) : searchQuery.trim() ? (
+          ) : hasSearched && searchQuery.trim() ? (
             <>
               <div className="mb-6">
                 <p className="text-sm text-muted-foreground">
@@ -284,7 +297,15 @@ function SearchContent() {
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">Masukkan kata kunci untuk mencari paket atau travel</p>
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                  <Search className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-foreground mb-1">Cari Paket atau Travel</p>
+                  <p className="text-sm text-muted-foreground">Masukkan kata kunci dan tekan tombol "Cari" atau Enter</p>
+                </div>
+              </div>
             </div>
           )}
         </main>
