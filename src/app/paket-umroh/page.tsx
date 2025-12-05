@@ -62,6 +62,7 @@ export default function PaketUmroh() {
   const isInitialMount = useRef(true)
   const isFetching = useRef(false) // Guard against concurrent fetches
   const lastSortKey = useRef<string>('') // Track last sort/location combination
+  const abortControllerRef = useRef<AbortController | null>(null) // For cancelling pending fetches
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
@@ -185,6 +186,16 @@ export default function PaketUmroh() {
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
+    // Cancel any pending fetch
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      console.log('🛑 Cancelled previous fetch')
+    }
+    
+    // Create new abort controller for this fetch
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+    
     // Prevent concurrent fetches of the same page
     if (isFetching.current && append) {
       console.log('⏸️ Fetch already in progress, skipping append')
@@ -232,7 +243,7 @@ export default function PaketUmroh() {
       const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam, sortParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
-      const response = await fetch(url)
+      const response = await fetch(url, { signal: abortController.signal })
       const result = await response.json()
       
       if (result.success) {
@@ -285,12 +296,20 @@ export default function PaketUmroh() {
           setPage(1) // Ensure page is reset
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch packages:', error)
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('✅ Fetch cancelled successfully')
+      } else {
+        console.error('Failed to fetch packages:', error)
+      }
     } finally {
       setLoading(false)
       setLoadingMore(false)
       isFetching.current = false
+      // Clear abort controller if this was the active one
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null
+      }
     }
   }
   
