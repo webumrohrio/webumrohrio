@@ -352,7 +352,7 @@ ${window.location.href}
                     <span className="hidden sm:inline font-medium">Share ke WhatsApp</span>
                   </Button>
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold mb-2">{travel.name}</h2>
+                <h1 className="text-xl md:text-2xl font-bold mb-2">{travel.name}</h1>
                 <div className="flex items-center gap-2">
                   {/* Departure City Badge */}
                   {travel.city && (

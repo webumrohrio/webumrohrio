@@ -35,18 +35,44 @@ export async function generateMetadata({
       ? travel.description.substring(0, 160) 
       : `${travel.name} - Travel umroh terpercaya di ${travel.city || 'Indonesia'}. Menyediakan ${travel._count.packages} paket umroh dengan berbagai pilihan jadwal dan harga.`
 
+    // Generate keyword variations for better SEO
+    const nameVariations = [
+      travel.name,
+      travel.name.replace(/\./g, ''), // Without dots
+      travel.name.replace(/PT\./gi, 'PT'), // PT without dot
+      travel.name.replace(/PT\./gi, ''), // Without PT
+      `${travel.name} ${travel.username.toUpperCase()}`, // With username
+      travel.username.toUpperCase(), // Just username
+    ]
+
     return {
       title: `${travel.name} - Travel Umroh ${travel.isVerified ? 'Terpercaya' : ''} | Tripbaitullah`,
       description: description,
       keywords: [
-        travel.name,
+        ...nameVariations,
         'travel umroh',
         `travel umroh ${travel.city}`,
         'paket umroh',
         'umroh terpercaya',
+        `travel ${travel.city}`,
+        'umroh murah',
+        'umroh hemat',
         travel.isVerified ? 'travel verified' : '',
-        'booking umroh'
+        'booking umroh',
+        'daftar umroh',
+        `${travel.name} umroh`
       ].filter(Boolean),
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
       authors: [{ name: travel.name }],
       openGraph: {
         title: `${travel.name} - Travel Umroh ${travel.isVerified ? 'Terpercaya' : ''}`,
