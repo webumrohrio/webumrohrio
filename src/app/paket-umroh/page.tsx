@@ -155,7 +155,7 @@ export default function PaketUmroh() {
     // Create unique key for this sort/location combination
     const currentKey = `${sortBy}-${preferredLocation}`
     
-    // Skip if already processed this combination (React Strict Mode double render)
+    // Skip if already processed this combination
     if (lastSortKey.current === currentKey) {
       console.log('⏭️ Skipping duplicate sort/location change')
       return
@@ -171,8 +171,15 @@ export default function PaketUmroh() {
     setLoading(true)
     isFetching.current = false // Reset fetch guard
     
-    // Fetch immediately
-    fetchPackages(preferredLocation, 1, false, activeSearch)
+    // Use timeout to debounce rapid changes
+    const timeoutId = setTimeout(() => {
+      fetchPackages(preferredLocation, 1, false, activeSearch)
+    }, 100)
+    
+    // Cleanup: cancel pending fetch if sort/location changes again
+    return () => {
+      clearTimeout(timeoutId)
+    }
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
