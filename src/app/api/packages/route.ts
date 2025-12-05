@@ -264,6 +264,13 @@ export async function GET(request: Request) {
   const period = searchParams.get('period')
   const simpleSort = searchParams.get('simpleSort') === 'true'
   
+  // Filter parameters
+  const departureMonth = searchParams.get('departureMonth')
+  const minDuration = searchParams.get('minDuration')
+  const maxDuration = searchParams.get('maxDuration')
+  const minPrice = searchParams.get('minPrice')
+  const maxPrice = searchParams.get('maxPrice')
+  
   // Pagination parameters
   const page = parseInt(searchParams.get('page') || '1')
   const pageSize = parseInt(searchParams.get('pageSize') || '20')
@@ -367,7 +374,10 @@ export async function GET(request: Request) {
             { travel: { username: { contains: search, mode: 'insensitive' } } },
             { travel: { name: { contains: search, mode: 'insensitive' } } }
           ]
-        } : {})
+        } : {}),
+        // Price range filter
+        ...(minPrice ? { price: { gte: parseInt(minPrice) } } : {}),
+        ...(maxPrice ? { price: { lte: parseInt(maxPrice) } } : {})
       },
       include: {
         travel: {
@@ -388,8 +398,36 @@ export async function GET(request: Request) {
       take: slug ? 1 : take  // Only take 1 if querying by slug
     })
 
+    // Filter by departure month and duration (post-fetch filtering)
+    let filteredPackages = packages
+    
+    if (departureMonth && departureMonth !== 'all') {
+      const targetMonth = parseInt(departureMonth)
+      filteredPackages = filteredPackages.filter(pkg => {
+        const pkgDate = new Date(pkg.departureDate)
+        return pkgDate.getMonth() === targetMonth
+      })
+    }
+    
+    if (minDuration || maxDuration) {
+      filteredPackages = filteredPackages.filter(pkg => {
+        const durationMatch = pkg.duration.match(/(\d+)/)
+        if (!durationMatch) return true
+        const days = parseInt(durationMatch[1])
+        
+        if (minDuration && maxDuration) {
+          return days >= parseInt(minDuration) && days <= parseInt(maxDuration)
+        } else if (minDuration) {
+          return days >= parseInt(minDuration)
+        } else if (maxDuration) {
+          return days <= parseInt(maxDuration)
+        }
+        return true
+      })
+    }
+
     // Get favorite counts for all packages (before sorting for popularity algorithm)
-    const packageIds = packages.map(pkg => pkg.id)
+    const packageIds = filteredPackages.map(pkg => pkg.id)
     const favoriteCounts = await db.favorite.groupBy({
       by: ['packageId'],
       where: {
@@ -407,8 +445,8 @@ export async function GET(request: Request) {
       favoriteCounts.map(fc => [fc.packageId, fc._count.packageId])
     )
 
-    // Add favorite count to packages before sorting
-    const packagesWithFavorites = packages.map(pkg => ({
+    // Add favorite count to filtered packages before sorting
+    const packagesWithFavorites = filteredPackages.map(pkg => ({
       ...pkg,
       favoriteCount: favoriteCountMap.get(pkg.id) || 0
     }))
@@ -521,7 +559,11 @@ export async function GET(request: Request) {
     console.log('Filtered packages:', packagesWithParsedData.length)
 
     // Calculate pagination metadata
-    const totalPages = Math.ceil(totalCount / pageSize)
+    // Use filtered count if month/duration filters are applied
+    const actualTotal = (departureMonth && departureMonth !== 'all') || minDuration || maxDuration 
+      ? filteredPackages.length 
+      : totalCount
+    const totalPages = Math.ceil(actualTotal / pageSize)
     const hasNextPage = page < totalPages
     const hasPrevPage = page > 1
 
@@ -529,7 +571,7 @@ export async function GET(request: Request) {
       success: true,
       data: packagesWithParsedData,
       pagination: {
-        total: totalCount,
+        total: actualTotal,
         page,
         pageSize,
         totalPages,

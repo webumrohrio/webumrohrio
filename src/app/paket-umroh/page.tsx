@@ -169,8 +169,20 @@ export default function PaketUmroh() {
       const pageSizeParam = searchToUse ? 'pageSize=50' : 'pageSize=20' // More results when searching
       const searchParam = searchToUse ? `search=${encodeURIComponent(searchToUse)}` : ''
       
+      // Filter parameters
+      const monthParam = departureMonth !== 'all' ? `departureMonth=${departureMonth}` : ''
+      const durationParam = duration !== 'all' ? (() => {
+        if (duration === '7-9') return 'minDuration=7&maxDuration=9'
+        if (duration === '10-12') return 'minDuration=10&maxDuration=12'
+        if (duration === '13+') return 'minDuration=13'
+        return ''
+      })() : ''
+      const priceParam = (priceRange[0] > 0 || priceRange[1] < 100000000) 
+        ? `minPrice=${priceRange[0]}&maxPrice=${priceRange[1]}` 
+        : ''
+      
       // Combine params
-      const params = [locationParam, pageParam, pageSizeParam, searchParam].filter(Boolean).join('&')
+      const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
       const response = await fetch(url)
@@ -351,32 +363,9 @@ export default function PaketUmroh() {
     return count
   }, [sortBy, departureMonth, duration, priceRange])
 
-  // Memoize filtered packages to prevent unnecessary recalculations
-  // Note: Search is now handled server-side via API, so we only filter by other criteria
-  const filteredPackages = useMemo(() => {
-    return packages.filter(pkg => {
-      // Departure month filter
-      let matchMonth = true
-      if (departureMonth !== 'all') {
-        const pkgDate = new Date(pkg.departureDateRaw)
-        matchMonth = pkgDate.getMonth() === parseInt(departureMonth)
-      }
-      
-      // Duration filter
-      let matchDuration = true
-      if (duration !== 'all') {
-        const days = parseInt(pkg.duration.split(' ')[0])
-        if (duration === '7-9') matchDuration = days >= 7 && days <= 9
-        else if (duration === '10-12') matchDuration = days >= 10 && days <= 12
-        else if (duration === '13+') matchDuration = days >= 13
-      }
-      
-      // Price range filter
-      const matchPrice = pkg.price >= priceRange[0] && pkg.price <= priceRange[1]
-      
-      return matchMonth && matchDuration && matchPrice
-    })
-  }, [packages, departureMonth, duration, priceRange])
+  // All filtering is now handled server-side via API
+  // Just return packages as-is since they're already filtered
+  const filteredPackages = packages
 
   return (
     <MobileLayout>
@@ -566,7 +555,11 @@ export default function PaketUmroh() {
                         </Button>
                         <Button 
                           className="flex-1"
-                          onClick={() => setIsFilterOpen(false)}
+                          onClick={() => {
+                            setIsFilterOpen(false)
+                            // Fetch with new filters
+                            fetchPackages(preferredLocation, 1, false, activeSearch)
+                          }}
                         >
                           Terapkan Filter
                         </Button>
