@@ -103,7 +103,7 @@ export async function PUT(
     if (body.travelId) {
       const existingPackage = await db.package.findUnique({
         where: { id },
-        select: { travelId: true }
+        select: { travelId: true, name: true, slug: true }
       })
 
       if (!existingPackage) {
@@ -119,6 +119,43 @@ export async function PUT(
           success: false,
           error: 'Unauthorized: Cannot transfer package to another travel'
         }, { status: 403 })
+      }
+    }
+
+    // Auto-generate slug from name if name changed
+    let slug = body.slug
+    const existingPkg = await db.package.findUnique({
+      where: { id },
+      select: { name: true, slug: true }
+    })
+
+    // If name changed, generate new slug
+    if (existingPkg && body.name && body.name !== existingPkg.name) {
+      // Generate base slug from name
+      let baseSlug = body.name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .trim()
+
+      slug = baseSlug
+      let counter = 1
+
+      // Check uniqueness and add number if needed
+      while (true) {
+        const existing = await db.package.findUnique({
+          where: { slug }
+        })
+
+        // If slug doesn't exist, or it's the current package, use it
+        if (!existing || existing.id === id) {
+          break
+        }
+
+        // Slug exists, try with number
+        slug = `${baseSlug}-${counter}`
+        counter++
       }
     }
 
@@ -143,6 +180,7 @@ export async function PUT(
       where: { id },
       data: {
         name: body.name,
+        slug: slug, // Use auto-generated slug
         description: body.description,
         image: body.image,
         price,
