@@ -353,19 +353,24 @@ export default function PaketUmroh() {
                   )}
                 </div>
 
-                <Button
-                  onClick={handleSearch}
-                  disabled={loading}
-                  className="h-10 md:h-12 min-w-[70px] md:min-w-[80px]"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    'Cari'
-                  )}
-                </Button>
+                {/* Show Cari button only when user is typing */}
+                {search.trim() && (
+                  <Button
+                    onClick={handleSearch}
+                    disabled={loading}
+                    className="h-10 md:h-12 min-w-[70px] md:min-w-[80px]"
+                  >
+                    {loading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      'Cari'
+                    )}
+                  </Button>
+                )}
 
-                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                {/* Show Filter button only when not typing */}
+                {!search.trim() && (
+                  <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                   <SheetTrigger asChild>
                     <Button 
                       variant={hasActiveFilters ? "default" : "outline"} 
@@ -507,6 +512,7 @@ export default function PaketUmroh() {
                     </div>
                   </SheetContent>
                 </Sheet>
+                )}
               </div>
             </div>
           </div>
