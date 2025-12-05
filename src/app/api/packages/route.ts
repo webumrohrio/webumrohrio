@@ -270,6 +270,7 @@ export async function GET(request: Request) {
   const maxDuration = searchParams.get('maxDuration')
   const minPrice = searchParams.get('minPrice')
   const maxPrice = searchParams.get('maxPrice')
+  const sortBy = searchParams.get('sortBy') // termurah, termahal, tercepat
   
   // Pagination parameters
   const page = parseInt(searchParams.get('page') || '1')
@@ -482,34 +483,57 @@ export async function GET(request: Request) {
         return seed
       }
 
-      // Sort packages with priority order: Pin > Verified (if enabled) > Algorithm
-      // Using single sort function to maintain priority order
-      sortedPackages = [...packagesWithFavorites].sort((a: any, b: any) => {
-        // Priority 1: Pinned packages always first (oldest pin first)
-        if (a.isPinned && !b.isPinned) return -1
-        if (!a.isPinned && b.isPinned) return 1
-        if (a.isPinned && b.isPinned) {
-          const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0
-          const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0
-          return aTime - bTime
-        }
+      // If custom sortBy is provided, use it instead of default algorithm
+      if (sortBy && ['termurah', 'termahal', 'tercepat'].includes(sortBy)) {
+        sortedPackages = [...packagesWithFavorites].sort((a: any, b: any) => {
+          // Priority 1: Pinned packages always first
+          if (a.isPinned && !b.isPinned) return -1
+          if (!a.isPinned && b.isPinned) return 1
+          if (a.isPinned && b.isPinned) {
+            const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0
+            const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0
+            return aTime - bTime
+          }
 
-        // Priority 2: Verified travel (if enabled)
-        if (verifiedPriority) {
-          if (a.travel.isVerified && !b.travel.isVerified) return -1
-          if (!a.travel.isVerified && b.travel.isVerified) return 1
-        }
+          // Priority 2: Apply custom sort
+          if (sortBy === 'termurah') {
+            return a.price - b.price
+          } else if (sortBy === 'termahal') {
+            return b.price - a.price
+          } else if (sortBy === 'tercepat') {
+            return new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()
+          }
+          return 0
+        })
+      } else {
+        // Default sorting with priority order: Pin > Verified (if enabled) > Algorithm
+        sortedPackages = [...packagesWithFavorites].sort((a: any, b: any) => {
+          // Priority 1: Pinned packages always first (oldest pin first)
+          if (a.isPinned && !b.isPinned) return -1
+          if (!a.isPinned && b.isPinned) return 1
+          if (a.isPinned && b.isPinned) {
+            const aTime = a.pinnedAt ? new Date(a.pinnedAt).getTime() : 0
+            const bTime = b.pinnedAt ? new Date(b.pinnedAt).getTime() : 0
+            return aTime - bTime
+          }
 
-        // Priority 3: Apply selected algorithm
-        if (algorithm === 'popular') {
-          return getPopularityScore(b) - getPopularityScore(a)
-        } else if (algorithm === 'random') {
-          const seed = getRandomWithSeed()
-          return Math.sin(seed + a.id.charCodeAt(0)) - Math.sin(seed + b.id.charCodeAt(0))
-        } else { // newest (default)
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        }
-      })
+          // Priority 2: Verified travel (if enabled)
+          if (verifiedPriority) {
+            if (a.travel.isVerified && !b.travel.isVerified) return -1
+            if (!a.travel.isVerified && b.travel.isVerified) return 1
+          }
+
+          // Priority 3: Apply selected algorithm
+          if (algorithm === 'popular') {
+            return getPopularityScore(b) - getPopularityScore(a)
+          } else if (algorithm === 'random') {
+            const seed = getRandomWithSeed()
+            return Math.sin(seed + a.id.charCodeAt(0)) - Math.sin(seed + b.id.charCodeAt(0))
+          } else { // newest (default)
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          }
+        })
+      }
     }
 
     // Apply limit after sorting (limit is already a number from take variable)

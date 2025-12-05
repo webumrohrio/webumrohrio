@@ -181,8 +181,11 @@ export default function PaketUmroh() {
         ? `minPrice=${priceRange[0]}&maxPrice=${priceRange[1]}` 
         : ''
       
+      // Sort parameter
+      const sortParam = sortBy !== 'default' ? `sortBy=${sortBy}` : ''
+      
       // Combine params
-      const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam].filter(Boolean).join('&')
+      const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam, sortParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
       const response = await fetch(url)
@@ -216,29 +219,8 @@ export default function PaketUmroh() {
           pinnedAt: pkg.pinnedAt
         }))
 
-        // Only apply client-side sorting if sortBy is not 'default'
-        if (sortBy !== 'default') {
-          // Separate pinned and non-pinned packages
-          const pinnedPackages = formattedPackages.filter((pkg: any) => pkg.isPinned)
-          const nonPinnedPackages = formattedPackages.filter((pkg: any) => !pkg.isPinned)
-
-          // Sort only non-pinned packages based on sortBy
-          if (sortBy === 'termurah') {
-            nonPinnedPackages.sort((a: Package, b: Package) => a.price - b.price)
-          } else if (sortBy === 'termahal') {
-            nonPinnedPackages.sort((a: Package, b: Package) => b.price - a.price)
-          } else if (sortBy === 'tercepat') {
-            nonPinnedPackages.sort((a: Package, b: Package) => {
-              const dateA = new Date(a.departureDateRaw).getTime()
-              const dateB = new Date(b.departureDateRaw).getTime()
-              return dateA - dateB
-            })
-          }
-
-          // Combine: pinned packages first, then sorted non-pinned packages
-          formattedPackages = [...pinnedPackages, ...nonPinnedPackages]
-        }
-        // If sortBy is 'default', keep the order from API (which already applies algorithm sorting)
+        // Sorting is now handled server-side via API
+        // Keep the order from API as-is
 
         // Set total count from API response
         if (result.pagination?.total !== undefined) {
