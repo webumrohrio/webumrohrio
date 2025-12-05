@@ -129,7 +129,8 @@ export default function PackagesPage() {
   const fetchPackages = async () => {
     try {
       // Add includeInactive=true to show all packages including inactive ones
-      const response = await fetch('/api/packages?includeInactive=true')
+      // Add pageSize=1000 to get all packages (admin dashboard should show all)
+      const response = await fetch('/api/packages?includeInactive=true&pageSize=1000')
       const result = await response.json()
       
       console.log('📦 Total packages from API:', result.data?.length)
