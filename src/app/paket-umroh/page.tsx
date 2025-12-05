@@ -57,6 +57,7 @@ export default function PaketUmroh() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
   const observerTarget = useRef<HTMLDivElement>(null)
   
   // Filter persistence
@@ -236,6 +237,11 @@ export default function PaketUmroh() {
         }
         // If sortBy is 'default', keep the order from API (which already applies algorithm sorting)
 
+        // Set total count from API response
+        if (result.pagination?.total !== undefined) {
+          setTotalCount(result.pagination.total)
+        }
+        
         // Check if there are more packages to load
         const hasMoreData = result.data.length === 20
         setHasMore(hasMoreData)
@@ -553,7 +559,12 @@ export default function PaketUmroh() {
         <main className="container mx-auto max-w-7xl px-4 md:px-6 py-4 md:py-6">
           <div className="mb-4 md:mb-6">
             <p className="text-sm md:text-base text-gray-600 font-medium">
-              {loading ? 'Memuat...' : `${filteredPackages.length} paket ditemukan`}
+              {loading ? 'Memuat...' : (
+                // Show total count from API if no filters applied, otherwise show filtered count
+                (debouncedSearch || departureMonth !== 'all' || duration !== 'all' || priceRange[0] > 0 || priceRange[1] < 100000000)
+                  ? `${filteredPackages.length} paket ditemukan`
+                  : `${totalCount} paket ditemukan`
+              )}
             </p>
           </div>
 
