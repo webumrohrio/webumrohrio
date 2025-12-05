@@ -152,6 +152,7 @@ export default function PaketUmroh() {
     
     // Reset to page 1 when sort or location changes
     // Pass activeSearch to maintain search query
+    console.log('🔄 sortBy or location changed, fetching...', { sortBy, preferredLocation })
     fetchPackages(preferredLocation, 1, false, activeSearch)
   }, [sortBy, preferredLocation])
 
@@ -463,7 +464,15 @@ export default function PaketUmroh() {
                       {/* Urutkan */}
                       <div>
                         <label className="text-sm font-medium mb-2 block">Urutkan Berdasarkan</label>
-                        <Select value={sortBy} onValueChange={setSortBy}>
+                        <Select 
+                          value={sortBy} 
+                          onValueChange={(value) => {
+                            // Set sortBy first
+                            setSortBy(value)
+                            // Note: fetchPackages will use the NEW sortBy value from state
+                            // because it reads sortBy directly in the function
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Pilih urutan" />
                           </SelectTrigger>
