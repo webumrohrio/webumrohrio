@@ -46,14 +46,12 @@ function SearchContent() {
   const [searchQuery, setSearchQuery] = useState(queryParam)
 
   useEffect(() => {
-    fetchData()
-  }, [])
-
-  useEffect(() => {
-    setSearchQuery(queryParam)
-    // Fetch data when query param changes
+    // Fetch initial data or search results based on query param
     if (queryParam) {
+      setSearchQuery(queryParam)
       fetchData(queryParam)
+    } else {
+      fetchData()
     }
   }, [queryParam])
 
@@ -112,9 +110,8 @@ function SearchContent() {
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
+      // Just update URL, useEffect will handle fetching
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
-      // Fetch data with search query for server-side filtering
-      fetchData(searchQuery)
     }
   }
 

@@ -335,9 +335,9 @@ export async function GET(request: Request) {
         ...(startDate ? { createdAt: { gte: startDate } } : {}),
         ...(search ? {
           OR: [
-            { name: { contains: search } },
-            { departureCity: { contains: search } },
-            { description: { contains: search } }
+            { name: { contains: search, mode: 'insensitive' } },
+            { departureCity: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } }
           ]
         } : {})
       }
@@ -361,11 +361,11 @@ export async function GET(request: Request) {
         ...(startDate ? { createdAt: { gte: startDate } } : {}),
         ...(search ? {
           OR: [
-            { name: { contains: search } },
-            { departureCity: { contains: search } },
-            { description: { contains: search } },
-            { travel: { username: { contains: search } } },
-            { travel: { name: { contains: search } } }
+            { name: { contains: search, mode: 'insensitive' } },
+            { departureCity: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+            { travel: { username: { contains: search, mode: 'insensitive' } } },
+            { travel: { name: { contains: search, mode: 'insensitive' } } }
           ]
         } : {})
       },
