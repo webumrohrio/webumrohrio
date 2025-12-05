@@ -203,6 +203,7 @@ export default function PaketUmroh() {
       const result = await response.json()
       
       console.log('📦 Received packages:', result.data?.length, 'Total:', result.pagination?.total)
+      console.log('📋 Package IDs:', result.data?.map((p: any) => `${p.id}:${p.name.substring(0, 20)}`).join(', '))
       
       if (result.success) {
         let formattedPackages = result.data.map((pkg: any) => ({
@@ -247,13 +248,7 @@ export default function PaketUmroh() {
         // Append or replace packages
         if (append) {
           console.log('📝 Appending packages:', formattedPackages.length, 'to existing:', packages.length)
-          setPackages(prev => {
-            // Check for duplicates before appending
-            const existingIds = new Set(prev.map(p => p.id))
-            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
-            console.log('✅ After dedup:', newPackages.length, 'new unique packages')
-            return [...prev, ...newPackages]
-          })
+          setPackages(prev => [...prev, ...formattedPackages])
         } else {
           console.log('🔄 Replacing packages with:', formattedPackages.length, 'new packages')
           setPackages(formattedPackages)
@@ -270,13 +265,17 @@ export default function PaketUmroh() {
   
   // Load more packages
   const loadMore = useCallback(() => {
+    console.log('🔄 loadMore called:', { loadingMore, hasMore, page, packagesCount: packages.length })
     if (!loadingMore && hasMore) {
       const nextPage = page + 1
+      console.log('✅ Loading page:', nextPage)
       setPage(nextPage)
       // Pass activeSearch to maintain search query and sorting
       fetchPackages(preferredLocation, nextPage, true, activeSearch)
+    } else {
+      console.log('❌ loadMore blocked:', { loadingMore, hasMore, page })
     }
-  }, [loadingMore, hasMore, page, preferredLocation, activeSearch])
+  }, [loadingMore, hasMore, page, preferredLocation, activeSearch, packages.length])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
