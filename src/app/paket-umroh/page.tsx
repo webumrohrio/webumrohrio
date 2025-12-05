@@ -59,6 +59,7 @@ export default function PaketUmroh() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const observerTarget = useRef<HTMLDivElement>(null)
+  const isInitialMount = useRef(true)
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
@@ -143,11 +144,15 @@ export default function PaketUmroh() {
   }, [filtersLoaded, saveScrollPosition])
 
   useEffect(() => {
-    if (preferredLocation !== '') {
-      // Reset to page 1 when sort or location changes
-      // Pass activeSearch to maintain search query
-      fetchPackages(preferredLocation, 1, false, activeSearch)
+    // Skip initial mount
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
     }
+    
+    // Reset to page 1 when sort or location changes
+    // Pass activeSearch to maintain search query
+    fetchPackages(preferredLocation, 1, false, activeSearch)
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
