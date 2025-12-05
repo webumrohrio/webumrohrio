@@ -145,7 +145,8 @@ export default function PaketUmroh() {
   useEffect(() => {
     if (preferredLocation !== '') {
       // Reset to page 1 when sort or location changes
-      fetchPackages(preferredLocation, 1, false)
+      // Pass activeSearch to maintain search query
+      fetchPackages(preferredLocation, 1, false, activeSearch)
     }
   }, [sortBy, preferredLocation])
 
@@ -251,9 +252,10 @@ export default function PaketUmroh() {
     if (!loadingMore && hasMore) {
       const nextPage = page + 1
       setPage(nextPage)
-      fetchPackages(preferredLocation, nextPage, true)
+      // Pass activeSearch to maintain search query and sorting
+      fetchPackages(preferredLocation, nextPage, true, activeSearch)
     }
-  }, [loadingMore, hasMore, page, preferredLocation])
+  }, [loadingMore, hasMore, page, preferredLocation, activeSearch])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
