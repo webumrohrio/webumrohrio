@@ -162,9 +162,9 @@ export default function PaketUmroh() {
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
-    // Prevent concurrent fetches
-    if (isFetching.current) {
-      console.log('⏸️ Fetch already in progress, skipping')
+    // Prevent concurrent fetches of the same page
+    if (isFetching.current && append) {
+      console.log('⏸️ Fetch already in progress, skipping append')
       return
     }
     
@@ -298,10 +298,11 @@ export default function PaketUmroh() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          console.log('👁️ Observer triggered loadMore')
           loadMore()
         }
       },
-      { threshold: 0.5, rootMargin: '200px' } // Increased threshold and added rootMargin
+      { threshold: 0.1, rootMargin: '100px' }
     )
 
     const currentTarget = observerTarget.current
@@ -315,25 +316,6 @@ export default function PaketUmroh() {
       }
     }
   }, [hasMore, loadingMore, loading, loadMore])
-  
-  // Fallback: Scroll listener for infinite scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (loadingMore || !hasMore || loading) return
-      
-      const scrollTop = window.scrollY || document.documentElement.scrollTop
-      const scrollHeight = document.documentElement.scrollHeight
-      const clientHeight = window.innerHeight
-      
-      // Trigger when user is 300px from bottom
-      if (scrollTop + clientHeight >= scrollHeight - 300) {
-        loadMore()
-      }
-    }
-    
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [loadingMore, hasMore, loading, loadMore])
   
   // Handle search button click or Enter key
   const handleSearch = () => {
