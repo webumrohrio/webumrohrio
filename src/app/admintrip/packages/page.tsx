@@ -11,7 +11,8 @@ import {
   Eye,
   Heart,
   MessageCircle,
-  Pin
+  Pin,
+  Copy
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -52,6 +53,7 @@ export default function PackagesPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [pinning, setPinning] = useState<string | null>(null)
+  const [duplicating, setDuplicating] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [cityFilter, setCityFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -188,6 +190,37 @@ export default function PackagesPage() {
       alert('❌ Terjadi kesalahan saat menghapus paket')
     } finally {
       setDeleting(null)
+    }
+  }
+
+  const handleDuplicate = async (id: string, name: string, travelId: string) => {
+    if (!confirm(`📋 Duplikat paket "${name}"?\n\nSemua data akan di-copy. Anda bisa edit tanggal dan detail lainnya setelah duplikasi.`)) {
+      return
+    }
+
+    setDuplicating(id)
+    
+    try {
+      const response = await fetch('/api/admintrip/packages/duplicate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId: id, travelId })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        alert('✅ Paket berhasil diduplikasi!\n\nAnda akan diarahkan ke halaman edit untuk mengubah tanggal dan detail lainnya.')
+        // Redirect to edit page of duplicated package
+        router.push(`/admintrip/packages/edit/${result.data.id}`)
+      } else {
+        alert('❌ Gagal menduplikasi paket: ' + (result.error || 'Unknown error'))
+      }
+    } catch (error) {
+      console.error('Duplicate error:', error)
+      alert('❌ Terjadi kesalahan saat menduplikasi paket')
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -584,6 +617,20 @@ export default function PackagesPage() {
                           onClick={() => router.push(`/paket-umroh/${pkg.id}`)}
                         >
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          onClick={() => handleDuplicate(pkg.id, pkg.name, pkg.travel.id)}
+                          disabled={duplicating === pkg.id}
+                          title="Duplikat Paket"
+                        >
+                          {duplicating === pkg.id ? (
+                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
                         </Button>
                         <Button
                           variant="ghost"
