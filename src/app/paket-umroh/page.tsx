@@ -61,6 +61,7 @@ export default function PaketUmroh() {
   const observerTarget = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
   const isFetching = useRef(false) // Guard against concurrent fetches
+  const lastSortKey = useRef<string>('') // Track last sort/location combination
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
@@ -151,7 +152,17 @@ export default function PaketUmroh() {
       return
     }
     
-    console.log('🔄 sortBy/location changed, resetting state')
+    // Create unique key for this sort/location combination
+    const currentKey = `${sortBy}-${preferredLocation}`
+    
+    // Skip if already processed this combination (React Strict Mode double render)
+    if (lastSortKey.current === currentKey) {
+      console.log('⏭️ Skipping duplicate sort/location change')
+      return
+    }
+    
+    lastSortKey.current = currentKey
+    console.log('🔄 sortBy/location changed, resetting state:', currentKey)
     
     // Reset all state synchronously
     setPackages([])
@@ -160,10 +171,8 @@ export default function PaketUmroh() {
     setLoading(true)
     isFetching.current = false // Reset fetch guard
     
-    // Small delay to ensure state is cleared before fetch
-    setTimeout(() => {
-      fetchPackages(preferredLocation, 1, false, activeSearch)
-    }, 10)
+    // Fetch immediately
+    fetchPackages(preferredLocation, 1, false, activeSearch)
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
