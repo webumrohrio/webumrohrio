@@ -244,6 +244,13 @@ export default function PaketUmroh() {
       const url = `/api/packages${params ? '?' + params : ''}`
       
       const response = await fetch(url, { signal: abortController.signal })
+      
+      // Check if this fetch was cancelled
+      if (abortController.signal.aborted) {
+        console.log('⏭️ Fetch was cancelled, skipping state update')
+        return
+      }
+      
       const result = await response.json()
       
       if (result.success) {
