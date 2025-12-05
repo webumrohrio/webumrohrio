@@ -163,6 +163,8 @@ export default function PaketUmroh() {
       setLoading(true)
       setPage(1)
       setHasMore(true)
+      // Clear packages immediately to prevent duplicates
+      setPackages([])
     }
     
     try {
@@ -244,9 +246,18 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          setPackages(prev => [...prev, ...formattedPackages])
+          console.log('📝 Appending packages:', formattedPackages.length, 'to existing:', packages.length)
+          setPackages(prev => {
+            // Check for duplicates before appending
+            const existingIds = new Set(prev.map(p => p.id))
+            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
+            console.log('✅ After dedup:', newPackages.length, 'new unique packages')
+            return [...prev, ...newPackages]
+          })
         } else {
+          console.log('🔄 Replacing packages with:', formattedPackages.length, 'new packages')
           setPackages(formattedPackages)
+          setPage(1) // Ensure page is reset
         }
       }
     } catch (error) {
