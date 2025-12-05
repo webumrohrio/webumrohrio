@@ -199,14 +199,6 @@ export default function PaketUmroh() {
       const response = await fetch(url)
       const result = await response.json()
       
-      console.log('📦 API Response:', {
-        page: pageNum,
-        append,
-        dataLength: result.data?.length,
-        total: result.pagination?.total,
-        hasNextPage: result.pagination?.hasNextPage
-      })
-      
       if (result.success) {
         let formattedPackages = result.data.map((pkg: any) => ({
           id: pkg.id,
@@ -245,7 +237,6 @@ export default function PaketUmroh() {
         
         // Check if there are more packages to load using API pagination info
         const hasMoreData = result.pagination?.hasNextPage ?? (result.data.length === 20)
-        console.log('🔄 Setting hasMore:', hasMoreData, 'based on hasNextPage:', result.pagination?.hasNextPage)
         setHasMore(hasMoreData)
         
         // Append or replace packages
@@ -255,16 +246,9 @@ export default function PaketUmroh() {
             const existingIds = new Set(prev.map(p => p.id))
             // Filter out packages that already exist
             const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
-            console.log('📝 Appending:', {
-              existing: prev.length,
-              new: formattedPackages.length,
-              afterDedup: newPackages.length,
-              total: prev.length + newPackages.length
-            })
             return [...prev, ...newPackages]
           })
         } else {
-          console.log('🔄 Replacing packages with:', formattedPackages.length)
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
         }
@@ -279,17 +263,13 @@ export default function PaketUmroh() {
   
   // Load more packages
   const loadMore = useCallback(() => {
-    console.log('🔄 loadMore triggered:', { loadingMore, hasMore, page, packagesCount: packages.length })
     if (!loadingMore && hasMore) {
       const nextPage = page + 1
-      console.log('✅ Loading page:', nextPage)
       setPage(nextPage)
       // Pass activeSearch to maintain search query and sorting
       fetchPackages(preferredLocation, nextPage, true, activeSearch)
-    } else {
-      console.log('❌ loadMore blocked')
     }
-  }, [loadingMore, hasMore, page, preferredLocation, activeSearch, packages.length])
+  }, [loadingMore, hasMore, page, preferredLocation, activeSearch])
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
