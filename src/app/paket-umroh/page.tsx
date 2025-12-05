@@ -162,8 +162,7 @@ export default function PaketUmroh() {
       setLoading(true)
       setPage(1)
       setHasMore(true)
-      // Clear packages immediately to prevent duplicates
-      setPackages([])
+      // Don't clear packages here - will be replaced after fetch completes
     }
     
     try {
@@ -241,13 +240,8 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          setPackages(prev => {
-            // Create a Set of existing IDs for fast lookup
-            const existingIds = new Set(prev.map(p => p.id))
-            // Filter out packages that already exist
-            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
-            return [...prev, ...newPackages]
-          })
+          // Simple append without dedup - API should not return duplicates
+          setPackages(prev => [...prev, ...formattedPackages])
         } else {
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
