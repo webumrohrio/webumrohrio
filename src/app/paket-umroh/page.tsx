@@ -43,7 +43,7 @@ export default function PaketUmroh() {
   const [packages, setPackages] = useState<Package[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [activeSearch, setActiveSearch] = useState('') // The actual search query being used
   const [sortBy, setSortBy] = useState('default')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [preferredLocation, setPreferredLocation] = useState<string>('')
@@ -64,19 +64,6 @@ export default function PaketUmroh() {
   const [filtersLoaded, setFiltersLoaded] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const { saveFilters, loadFilters, clearFilters, saveScrollPosition } = useFilterPersistence()
-
-  // Debounced search handler
-  const debouncedSetSearch = useCallback(
-    debounce((value: string) => {
-      setDebouncedSearch(value)
-    }, 300),
-    []
-  )
-
-  // Update debounced search when search changes
-  useEffect(() => {
-    debouncedSetSearch(search)
-  }, [search, debouncedSetSearch])
 
   // Load saved filters on mount
   useEffect(() => {
@@ -176,10 +163,11 @@ export default function PaketUmroh() {
       const loc = location || preferredLocation
       const locationParam = loc && loc !== 'all' ? `location=${loc}` : ''
       const pageParam = `page=${pageNum}`
-      const pageSizeParam = 'pageSize=20'
+      const pageSizeParam = activeSearch ? 'pageSize=50' : 'pageSize=20' // More results when searching
+      const searchParam = activeSearch ? `search=${encodeURIComponent(activeSearch)}` : ''
       
       // Combine params
-      const params = [locationParam, pageParam, pageSizeParam].filter(Boolean).join('&')
+      const params = [locationParam, pageParam, pageSizeParam, searchParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
       const response = await fetch(url)
@@ -293,8 +281,27 @@ export default function PaketUmroh() {
     }
   }, [hasMore, loadingMore, loading, loadMore])
   
+  // Handle search button click or Enter key
+  const handleSearch = () => {
+    if (search.trim()) {
+      setActiveSearch(search.trim())
+      fetchPackages(preferredLocation, 1, false)
+    } else if (activeSearch) {
+      // Clear search if input is empty
+      setActiveSearch('')
+      fetchPackages(preferredLocation, 1, false)
+    }
+  }
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+  
   const resetFilters = () => {
     setSearch('')
+    setActiveSearch('')
     setSortBy('default')
     setDepartureMonth('all')
     setDuration('all')
@@ -340,13 +347,9 @@ export default function PaketUmroh() {
   }, [sortBy, departureMonth, duration, priceRange])
 
   // Memoize filtered packages to prevent unnecessary recalculations
+  // Note: Search is now handled server-side via API, so we only filter by other criteria
   const filteredPackages = useMemo(() => {
     return packages.filter(pkg => {
-      // Search filter - using debounced search for better performance
-      const matchSearch = pkg.packageName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        pkg.travelName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        pkg.departureCity.toLowerCase().includes(debouncedSearch.toLowerCase())
-      
       // Departure month filter
       let matchMonth = true
       if (departureMonth !== 'all') {
@@ -366,9 +369,9 @@ export default function PaketUmroh() {
       // Price range filter
       const matchPrice = pkg.price >= priceRange[0] && pkg.price <= priceRange[1]
       
-      return matchSearch && matchMonth && matchDuration && matchPrice
+      return matchMonth && matchDuration && matchPrice
     })
-  }, [packages, debouncedSearch, departureMonth, duration, priceRange])
+  }, [packages, departureMonth, duration, priceRange])
 
   return (
     <MobileLayout>
@@ -405,12 +408,15 @@ export default function PaketUmroh() {
                     placeholder="Cari paket umroh..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
                     className="pl-10 md:pl-12 pr-10 h-10 md:h-12"
                   />
                   {search && (
                     <button
                       onClick={() => {
                         setSearch('')
+                        setActiveSearch('')
+                        fetchPackages(preferredLocation, 1, false)
                       }}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                       aria-label="Hapus pencarian"
@@ -419,6 +425,18 @@ export default function PaketUmroh() {
                     </button>
                   )}
                 </div>
+
+                <Button
+                  onClick={handleSearch}
+                  disabled={loading}
+                  className="h-10 md:h-12 min-w-[70px] md:min-w-[80px]"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    'Cari'
+                  )}
+                </Button>
 
                 <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                   <SheetTrigger asChild>
@@ -561,8 +579,8 @@ export default function PaketUmroh() {
             <p className="text-sm md:text-base text-gray-600 font-medium">
               {loading ? 'Memuat...' : (
                 // Show total count from API if no filters applied, otherwise show filtered count
-                (debouncedSearch || departureMonth !== 'all' || duration !== 'all' || priceRange[0] > 0 || priceRange[1] < 100000000)
-                  ? `${filteredPackages.length} paket ditemukan`
+                (activeSearch || departureMonth !== 'all' || duration !== 'all' || priceRange[0] > 0 || priceRange[1] < 100000000)
+                  ? `${filteredPackages.length} paket ditemukan${activeSearch ? ` untuk "${activeSearch}"` : ''}`
                   : `${totalCount} paket ditemukan`
               )}
             </p>
