@@ -182,7 +182,7 @@ function SearchContent() {
           relevanceScore: calculatePackageRelevance(pkg, searchQuery)
         }))
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, 20) // Show top 20 most relevant packages
+        .slice(0, 5) // Show top 5 most relevant packages
     : []
 
   const filteredTravels = searchQuery.trim()
