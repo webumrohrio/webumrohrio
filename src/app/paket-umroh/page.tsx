@@ -230,7 +230,7 @@ export default function PaketUmroh() {
       
       const locationParam = loc && loc !== 'all' ? `location=${loc}` : ''
       const pageParam = `page=${pageNum}`
-      const pageSizeParam = searchToUse ? 'pageSize=50' : 'pageSize=20' // More results when searching
+      const pageSizeParam = 'pageSize=100' // Load all packages in one page
       const searchParam = searchToUse ? `search=${encodeURIComponent(searchToUse)}` : ''
       
       // Filter parameters
@@ -305,7 +305,7 @@ export default function PaketUmroh() {
         }
         
         // Check if there are more packages to load using API pagination info
-        const hasMoreData = result.pagination?.hasNextPage ?? (result.data.length === 20)
+        const hasMoreData = result.pagination?.hasNextPage ?? (result.data.length === 100)
         setHasMore(hasMoreData)
         
         // Append or replace packages
