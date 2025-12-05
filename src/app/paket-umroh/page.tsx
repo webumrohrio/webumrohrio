@@ -255,21 +255,36 @@ export default function PaketUmroh() {
         // Append or replace packages
         if (append) {
           setPackages(prev => {
+            console.log('📊 Before append:', {
+              existingCount: prev.length,
+              existingIds: prev.map(p => p.id).slice(0, 5),
+              newCount: formattedPackages.length,
+              newIds: formattedPackages.map((p: Package) => p.id).slice(0, 5)
+            })
+            
             const existingIds = new Set(prev.map(p => p.id))
             const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
             
             // Debug logging
             if (formattedPackages.length !== newPackages.length) {
+              const duplicates = formattedPackages.filter((p: Package) => existingIds.has(p.id))
               console.warn('⚠️ Filtered duplicates:', {
                 received: formattedPackages.length,
                 afterDedup: newPackages.length,
-                duplicates: formattedPackages.filter((p: Package) => existingIds.has(p.id)).map((p: Package) => p.id)
+                duplicateIds: duplicates.map((p: Package) => p.id),
+                duplicateNames: duplicates.map((p: Package) => p.packageName)
               })
             }
+            
+            console.log('✅ After append:', {
+              totalCount: prev.length + newPackages.length,
+              addedCount: newPackages.length
+            })
             
             return [...prev, ...newPackages]
           })
         } else {
+          console.log('🔄 Replacing with:', formattedPackages.length, 'packages')
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
         }
