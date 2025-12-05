@@ -151,6 +151,11 @@ export default function PaketUmroh() {
       return
     }
     
+    // Clear packages immediately when sort/location changes to prevent stale data
+    setPackages([])
+    setPage(1)
+    setHasMore(true)
+    
     // Reset to page 1 when sort or location changes
     // Pass activeSearch to maintain search query
     fetchPackages(preferredLocation, 1, false, activeSearch)
