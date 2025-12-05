@@ -395,8 +395,9 @@ export async function GET(request: Request) {
         }
       },
       // Don't use orderBy here - let the algorithm sort it
-      skip: slug ? 0 : skip, // Don't skip if querying by slug
-      take: slug ? 1 : take  // Only take 1 if querying by slug
+      // If custom sortBy is provided, don't use skip/take yet (sort first, then paginate)
+      skip: slug ? 0 : (sortBy && ['termurah', 'termahal', 'tercepat'].includes(sortBy) ? 0 : skip),
+      take: slug ? 1 : (sortBy && ['termurah', 'termahal', 'tercepat'].includes(sortBy) ? 1000 : take)
     })
 
     // Filter by departure month and duration (post-fetch filtering)
@@ -536,8 +537,15 @@ export async function GET(request: Request) {
       }
     }
 
-    // Apply limit after sorting (limit is already a number from take variable)
-    const limitedPackages = sortedPackages
+    // Apply pagination after sorting for custom sortBy
+    let limitedPackages
+    if (sortBy && ['termurah', 'termahal', 'tercepat'].includes(sortBy)) {
+      // Manual pagination after sorting
+      limitedPackages = sortedPackages.slice(skip, skip + take)
+    } else {
+      // Already paginated by database
+      limitedPackages = sortedPackages
+    }
 
     // If querying by slug (detail view), increment views and log to tracking table
     if (slug && limitedPackages.length > 0) {
