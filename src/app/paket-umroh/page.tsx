@@ -13,8 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Slider } from '@/components/ui/slider'
 import { Search, Filter, X } from 'lucide-react'
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { debounce } from '@/lib/debounce'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { useFilterPersistence } from '@/hooks/useFilterPersistence'
 
@@ -53,21 +52,11 @@ export default function PaketUmroh() {
   const [duration, setDuration] = useState('all')
   const [priceRange, setPriceRange] = useState([0, 100000000])
   
-  // Infinite scroll states
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
-  const observerTarget = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
-  const isFetching = useRef(false) // Guard against concurrent fetches
-  const lastSortKey = useRef<string>('') // Track last sort/location combination
-  const abortControllerRef = useRef<AbortController | null>(null) // For cancelling pending fetches
-  const fetchGeneration = useRef(0) // Track fetch generation to ignore stale updates
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
-  const scrollRef = useRef<HTMLDivElement>(null)
   const { saveFilters, loadFilters, clearFilters, saveScrollPosition } = useFilterPersistence()
 
   // Load saved filters on mount
@@ -154,73 +143,12 @@ export default function PaketUmroh() {
       return
     }
     
-    // Create unique key for this sort/location combination
-    const currentKey = `${sortBy}-${preferredLocation}`
-    
-    // Skip if already processed this combination
-    if (lastSortKey.current === currentKey) {
-      console.log('⏭️ Skipping duplicate sort/location change')
-      return
-    }
-    
-    console.log('🔄 sortBy/location changed, resetting state:', currentKey)
-    
-    // Increment generation to invalidate pending fetches
-    fetchGeneration.current++
-    console.log('📈 New fetch generation:', fetchGeneration.current)
-    
-    // Reset all state synchronously
-    setPackages([])
-    setPage(1)
-    setHasMore(true)
-    setLoading(true)
-    isFetching.current = false // Reset fetch guard
-    
-    // Update lastSortKey AFTER state is reset
-    lastSortKey.current = currentKey
-    
-    // Use timeout to debounce rapid changes
-    const timeoutId = setTimeout(() => {
-      fetchPackages(preferredLocation, 1, false, activeSearch)
-    }, 100)
-    
-    // Cleanup: cancel pending fetch if sort/location changes again
-    return () => {
-      clearTimeout(timeoutId)
-    }
+    // Fetch when sort or location changes
+    fetchPackages(preferredLocation, 1, false, activeSearch)
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
-    // Capture current generation
-    const currentGeneration = fetchGeneration.current
-    console.log('🎯 Starting fetch for generation:', currentGeneration, 'page:', pageNum)
-    
-    // Cancel any pending fetch
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-      console.log('🛑 Cancelled previous fetch')
-    }
-    
-    // Create new abort controller for this fetch
-    const abortController = new AbortController()
-    abortControllerRef.current = abortController
-    
-    // Prevent concurrent fetches of the same page
-    if (isFetching.current && append) {
-      console.log('⏸️ Fetch already in progress, skipping append')
-      return
-    }
-    
-    isFetching.current = true
-    
-    if (append) {
-      setLoadingMore(true)
-    } else {
-      setLoading(true)
-      setPage(1)
-      setHasMore(true)
-      // Don't clear packages here - will be replaced after fetch completes
-    }
+    setLoading(true)
     
     try {
       // Use location parameter or preferredLocation state
@@ -252,20 +180,7 @@ export default function PaketUmroh() {
       const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam, sortParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
-      const response = await fetch(url, { signal: abortController.signal })
-      
-      // Check if this fetch was cancelled
-      if (abortController.signal.aborted) {
-        console.log('⏭️ Fetch was cancelled, skipping state update')
-        return
-      }
-      
-      // Check if this fetch is stale (generation changed)
-      if (currentGeneration !== fetchGeneration.current) {
-        console.log('⏭️ Fetch is stale (gen', currentGeneration, 'vs current', fetchGeneration.current, '), skipping state update')
-        return
-      }
-      
+      const response = await fetch(url)
       const result = await response.json()
       
       if (result.success) {
@@ -299,81 +214,19 @@ export default function PaketUmroh() {
         // Sorting is now handled server-side via API
         // Keep the order from API as-is
 
-        // Set total count from API response
+        // Set total count and packages
         if (result.pagination?.total !== undefined) {
           setTotalCount(result.pagination.total)
         }
         
-        // Check if there are more packages to load using API pagination info
-        const hasMoreData = result.pagination?.hasNextPage ?? (result.data.length === 100)
-        setHasMore(hasMoreData)
-        
-        // Append or replace packages
-        if (append) {
-          setPackages(prev => {
-            // Simple dedup: create map of existing IDs
-            const existingIds = new Set(prev.map(p => p.id))
-            // Only add packages that don't exist
-            const uniqueNew = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
-            console.log('📊 Appending:', uniqueNew.length, 'unique packages (filtered', formattedPackages.length - uniqueNew.length, 'duplicates)')
-            return [...prev, ...uniqueNew]
-          })
-        } else {
-          console.log('🔄 Replacing with:', formattedPackages.length, 'packages')
-          setPackages(formattedPackages)
-          setPage(1) // Ensure page is reset
-        }
+        setPackages(formattedPackages)
       }
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('✅ Fetch cancelled successfully')
-      } else {
-        console.error('Failed to fetch packages:', error)
-      }
+    } catch (error) {
+      console.error('Failed to fetch packages:', error)
     } finally {
       setLoading(false)
-      setLoadingMore(false)
-      isFetching.current = false
-      // Clear abort controller if this was the active one
-      if (abortControllerRef.current === abortController) {
-        abortControllerRef.current = null
-      }
     }
   }
-  
-  // Load more packages
-  const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      const nextPage = page + 1
-      setPage(nextPage)
-      // Pass activeSearch to maintain search query and sorting
-      fetchPackages(preferredLocation, nextPage, true, activeSearch)
-    }
-  }, [loadingMore, hasMore, page, preferredLocation, activeSearch])
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
-          console.log('👁️ Observer triggered loadMore')
-          loadMore()
-        }
-      },
-      { threshold: 0.1, rootMargin: '100px' }
-    )
-
-    const currentTarget = observerTarget.current
-    if (currentTarget) {
-      observer.observe(currentTarget)
-    }
-
-    return () => {
-      if (currentTarget) {
-        observer.unobserve(currentTarget)
-      }
-    }
-  }, [hasMore, loadingMore, loading, loadMore])
   
   // Handle search button click or Enter key
   const handleSearch = () => {
@@ -685,19 +538,6 @@ export default function PaketUmroh() {
                 {filteredPackages.map((pkg) => (
                   <PackageCard key={pkg.id} {...pkg} />
                 ))}
-              </div>
-              
-              {/* Infinite Scroll Trigger */}
-              <div ref={observerTarget} className="w-full py-8 flex justify-center">
-                {loadingMore && (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-muted-foreground">Memuat paket lainnya...</p>
-                  </div>
-                )}
-                {!hasMore && packages.length > 0 && (
-                  <p className="text-sm text-muted-foreground">Semua paket telah ditampilkan</p>
-                )}
               </div>
             </>
           ) : (
