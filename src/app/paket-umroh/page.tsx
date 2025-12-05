@@ -60,6 +60,7 @@ export default function PaketUmroh() {
   const [totalCount, setTotalCount] = useState(0)
   const observerTarget = useRef<HTMLDivElement>(null)
   const isInitialMount = useRef(true)
+  const isFetching = useRef(false) // Guard against concurrent fetches
   
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
@@ -156,6 +157,14 @@ export default function PaketUmroh() {
   }, [sortBy, preferredLocation])
 
   const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false, searchQuery?: string) => {
+    // Prevent concurrent fetches
+    if (isFetching.current) {
+      console.log('⏸️ Fetch already in progress, skipping')
+      return
+    }
+    
+    isFetching.current = true
+    
     if (append) {
       setLoadingMore(true)
     } else {
@@ -240,8 +249,21 @@ export default function PaketUmroh() {
         
         // Append or replace packages
         if (append) {
-          // Simple append without dedup - API should not return duplicates
-          setPackages(prev => [...prev, ...formattedPackages])
+          setPackages(prev => {
+            const existingIds = new Set(prev.map(p => p.id))
+            const newPackages = formattedPackages.filter((p: Package) => !existingIds.has(p.id))
+            
+            // Debug logging
+            if (formattedPackages.length !== newPackages.length) {
+              console.warn('⚠️ Filtered duplicates:', {
+                received: formattedPackages.length,
+                afterDedup: newPackages.length,
+                duplicates: formattedPackages.filter((p: Package) => existingIds.has(p.id)).map((p: Package) => p.id)
+              })
+            }
+            
+            return [...prev, ...newPackages]
+          })
         } else {
           setPackages(formattedPackages)
           setPage(1) // Ensure page is reset
@@ -252,6 +274,7 @@ export default function PaketUmroh() {
     } finally {
       setLoading(false)
       setLoadingMore(false)
+      isFetching.current = false
     }
   }
   
