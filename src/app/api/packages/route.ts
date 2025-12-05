@@ -322,7 +322,12 @@ export async function GET(request: Request) {
     // Count total packages for pagination
     const totalCount = await db.package.count({
       where: {
-        ...(includeInactive ? {} : { isActive: true }),
+        ...(includeInactive ? {} : { 
+          isActive: true,
+          travel: {
+            isActive: true
+          }
+        }),
         ...(travelId ? { travelId } : {}),
         ...(slug ? { slug } : {}),
         ...(category && category !== 'all' ? { category } : {}),
@@ -342,9 +347,9 @@ export async function GET(request: Request) {
     const packages = await db.package.findMany({
       where: {
         // Only filter by isActive if includeInactive is false (default behavior for public pages)
-        ...(includeInactive ? {} : { isActive: true }),
-        // Only show packages from active travels (for public pages)
         ...(includeInactive ? {} : { 
+          isActive: true,
+          // Only show packages from active travels (for public pages)
           travel: {
             isActive: true
           }
