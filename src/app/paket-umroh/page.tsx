@@ -189,8 +189,12 @@ export default function PaketUmroh() {
       const params = [locationParam, pageParam, pageSizeParam, searchParam, monthParam, durationParam, priceParam, sortParam].filter(Boolean).join('&')
       const url = `/api/packages${params ? '?' + params : ''}`
       
+      console.log('🔍 Fetching packages:', { url, sortBy, pageNum, append })
+      
       const response = await fetch(url)
       const result = await response.json()
+      
+      console.log('📦 Received packages:', result.data?.length, 'Total:', result.pagination?.total)
       
       if (result.success) {
         let formattedPackages = result.data.map((pkg: any) => ({
