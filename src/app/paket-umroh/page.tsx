@@ -53,6 +53,12 @@ export default function PaketUmroh() {
   const [duration, setDuration] = useState('all')
   const [priceRange, setPriceRange] = useState([0, 100000000])
   
+  // Infinite scroll states
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
+  
   // Filter persistence
   const [filtersLoaded, setFiltersLoaded] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -150,17 +156,32 @@ export default function PaketUmroh() {
 
   useEffect(() => {
     if (preferredLocation !== '') {
-      fetchPackages(preferredLocation)
+      // Reset to page 1 when sort or location changes
+      fetchPackages(preferredLocation, 1, false)
     }
   }, [sortBy, preferredLocation])
 
-  const fetchPackages = async (location?: string) => {
-    setLoading(true)
+  const fetchPackages = async (location?: string, pageNum: number = 1, append: boolean = false) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+      setPage(1)
+      setHasMore(true)
+    }
+    
     try {
       // Use location parameter or preferredLocation state
       const loc = location || preferredLocation
-      const locationParam = loc && loc !== 'all' ? `?location=${loc}` : ''
-      const response = await fetch(`/api/packages${locationParam}`)
+      const locationParam = loc && loc !== 'all' ? `location=${loc}` : ''
+      const pageParam = `page=${pageNum}`
+      const pageSizeParam = 'pageSize=20'
+      
+      // Combine params
+      const params = [locationParam, pageParam, pageSizeParam].filter(Boolean).join('&')
+      const url = `/api/packages${params ? '?' + params : ''}`
+      
+      const response = await fetch(url)
       const result = await response.json()
       
       if (result.success) {
@@ -215,15 +236,57 @@ export default function PaketUmroh() {
         }
         // If sortBy is 'default', keep the order from API (which already applies algorithm sorting)
 
-        setPackages(formattedPackages)
+        // Check if there are more packages to load
+        const hasMoreData = result.data.length === 20
+        setHasMore(hasMoreData)
+        
+        // Append or replace packages
+        if (append) {
+          setPackages(prev => [...prev, ...formattedPackages])
+        } else {
+          setPackages(formattedPackages)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch packages:', error)
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }
+  
+  // Load more packages
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      const nextPage = page + 1
+      setPage(nextPage)
+      fetchPackages(preferredLocation, nextPage, true)
+    }
+  }, [loadingMore, hasMore, page, preferredLocation])
 
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasMore, loadingMore, loading, loadMore])
+  
   const resetFilters = () => {
     setSearch('')
     setSortBy('default')
@@ -502,11 +565,26 @@ export default function PaketUmroh() {
               ))}
             </div>
           ) : filteredPackages.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
-              {filteredPackages.map((pkg) => (
-                <PackageCard key={pkg.id} {...pkg} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-6">
+                {filteredPackages.map((pkg) => (
+                  <PackageCard key={pkg.id} {...pkg} />
+                ))}
+              </div>
+              
+              {/* Infinite Scroll Trigger */}
+              <div ref={observerTarget} className="w-full py-8 flex justify-center">
+                {loadingMore && (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-muted-foreground">Memuat paket lainnya...</p>
+                  </div>
+                )}
+                {!hasMore && packages.length > 0 && (
+                  <p className="text-sm text-muted-foreground">Semua paket telah ditampilkan</p>
+                )}
+              </div>
+            </>
           ) : (
             <EmptyState
               icon="search"
