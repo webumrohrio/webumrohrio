@@ -51,12 +51,23 @@ function SearchContent() {
 
   useEffect(() => {
     setSearchQuery(queryParam)
+    // Fetch data when query param changes
+    if (queryParam) {
+      fetchData(queryParam)
+    }
   }, [queryParam])
 
-  const fetchData = async () => {
+  const fetchData = async (query?: string) => {
+    setLoading(true)
     try {
+      // If there's a search query, use search parameter for server-side filtering
+      // Otherwise, fetch initial data with reasonable limit
+      const searchParam = query ? `search=${encodeURIComponent(query)}` : ''
+      const pageSizeParam = query ? 'pageSize=50' : 'pageSize=20' // More results when searching
+      const params = [searchParam, pageSizeParam].filter(Boolean).join('&')
+      
       const [packagesRes, travelsRes] = await Promise.all([
-        fetch('/api/packages'),
+        fetch(`/api/packages?${params}`),
         fetch('/api/travels')
       ])
 
@@ -102,6 +113,8 @@ function SearchContent() {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+      // Fetch data with search query for server-side filtering
+      fetchData(searchQuery)
     }
   }
 
@@ -170,7 +183,7 @@ function SearchContent() {
           relevanceScore: calculatePackageRelevance(pkg, searchQuery)
         }))
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, 5) // Limit to 5 most relevant
+        .slice(0, 20) // Show top 20 most relevant packages
     : []
 
   const filteredTravels = searchQuery.trim()
@@ -189,7 +202,7 @@ function SearchContent() {
           relevanceScore: calculateTravelRelevance(travel, searchQuery)
         }))
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, 5) // Limit to 5 most relevant
+        .slice(0, 10) // Show top 10 most relevant travels
     : []
 
   return (
